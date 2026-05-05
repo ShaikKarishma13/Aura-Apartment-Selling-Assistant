@@ -536,3 +536,58 @@ h1 {
   border-radius: 8px;
   cursor: pointer;
 }
+/* TOPBAR */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+.icon-wrapper {
+  position: relative;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: rgba(0,0,0,0.8);
+  padding: 10px;
+  border-radius: 10px;
+  min-width: 180px;
+  color: white;
+  z-index: 100;
+}
+
+.dropdown p {
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.dropdown p:hover {
+  opacity: 0.7;
+}
+.logout {
+  margin-top: auto;
+  margin-bottom: 40px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.logout:hover {
+  background: rgba(255,255,255,0.1);
+}
