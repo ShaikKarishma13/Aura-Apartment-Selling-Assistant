@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import FollowUps from "./pages/FollowUps";
 import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics"; // ✅ ADD THIS
 
 function App() {
   const [leads, setLeads] = useState([]);
@@ -38,10 +39,15 @@ function App() {
           element={<FollowUps leads={leads} />}
         />
 
-        {/* ✅ ADD THIS */}
         <Route
           path="/settings"
           element={<Settings />}
+        />
+
+        {/* ✅ ADD THIS */}
+        <Route
+          path="/analytics"
+          element={<Analytics leads={leads} />}
         />
 
       </Routes>

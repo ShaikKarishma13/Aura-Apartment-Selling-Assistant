@@ -463,3 +463,26 @@ h1 {
 .save-btn:hover {
   transform: scale(1.05);
 }
+/* ================= ANALYTICS ================= */
+
+.analytics-filter {
+  margin: 20px 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+.analytics-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.insights-panel {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  max-width: 700px;
+}

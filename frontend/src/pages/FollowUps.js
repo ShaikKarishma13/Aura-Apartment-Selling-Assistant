@@ -29,8 +29,7 @@ function FollowUps({ leads = [] }) {
       <div className="main-content">
         <Topbar />
 
-        {/* ✅ DEBUG TEXT (NOW INSIDE RETURN) */}
-        <h1 style={{ color: "white" }}>FOLLOW UPS PAGE LOADED</h1>
+       
 
         <h1>Follow-ups 📅</h1>
 
