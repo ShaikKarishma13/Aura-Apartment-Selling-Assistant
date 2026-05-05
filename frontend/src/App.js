@@ -6,7 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import FollowUps from "./pages/FollowUps";
 import Settings from "./pages/Settings";
-import Analytics from "./pages/Analytics"; // ✅ ADD THIS
+import Analytics from "./pages/Analytics";
+import Calls from "./pages/Calls"; // ✅ FIXED (capital C)
 
 function App() {
   const [leads, setLeads] = useState([]);
@@ -44,10 +45,15 @@ function App() {
           element={<Settings />}
         />
 
-        {/* ✅ ADD THIS */}
         <Route
           path="/analytics"
           element={<Analytics leads={leads} />}
+        />
+
+        {/* ✅ ADD CALLS ROUTE */}
+        <Route
+          path="/calls"
+          element={<Calls />}
         />
 
       </Routes>
