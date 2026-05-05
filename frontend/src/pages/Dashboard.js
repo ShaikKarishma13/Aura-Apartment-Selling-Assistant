@@ -103,24 +103,37 @@ function Dashboard({ leads = [], activities = [] }) {
             </table>
           </div>
 
-          {/* RIGHT → ACTIVITY FEED */}
+          {/* RIGHT → ACTIVITY FEED (UPDATED) */}
           <div className="activity-feed">
-            <h2>Activity Feed 🔔</h2>
+            <h2>AI Activity Feed 🤖</h2>
 
             {activities.length === 0 ? (
               <p>No activity yet</p>
             ) : (
-              activities.slice(0, 5).map((act, index) => (
-                <div key={index} className="activity-item">
-                  <b>
-                    {new Date(act.time).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </b>{" "}
-                  - {act.text}
-                </div>
-              ))
+              activities.slice(0, 5).map((act, index) => {
+                let icon = "📌";
+
+                if (act.text.includes("Calling")) icon = "📞";
+                else if (act.text.includes("responded")) icon = "💬";
+                else if (act.text.includes("HOT")) icon = "🔥";
+                else if (act.text.includes("follow-up")) icon = "📅";
+                else if (act.text.includes("removed")) icon = "❌";
+
+                return (
+                  <div key={index} className="activity-item">
+                    <span className="activity-time">
+                      {new Date(act.time).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+
+                    <span className="activity-text">
+                      {icon} {act.text}
+                    </span>
+                  </div>
+                );
+              })
             )}
           </div>
 

@@ -8,8 +8,18 @@ function Leads({ leads, setLeads, setActivities }) {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [editLead, setEditLead] = useState(null);
-
   const [followUpDate, setFollowUpDate] = useState("");
+
+  // 🔥 HELPER → AI STYLE LOG
+  const logActivity = (message) => {
+    setActivities((prev) => [
+      {
+        text: message,
+        time: new Date(),
+      },
+      ...prev,
+    ]);
+  };
 
   // ✅ START EDIT
   const startEdit = (lead) => {
@@ -53,22 +63,11 @@ function Leads({ leads, setLeads, setActivities }) {
 
       setLeads(updatedLeads);
 
-      setActivities((prev) => [
-        {
-          text: `Edited lead: ${editLead.name} → ${status}`,
-          time: new Date(),
-        },
-        ...prev,
-      ]);
-
+      // 🔥 AI STYLE LOGS
+      logActivity(`AI updated lead ${name} → Status changed to ${status}`);
+      
       if (followUpDate) {
-        setActivities((prev) => [
-          {
-            text: `Follow-up set for ${name} on ${followUpDate}`,
-            time: new Date(),
-          },
-          ...prev,
-        ]);
+        logActivity(`Follow-up scheduled for ${name} on ${followUpDate}`);
       }
 
       setEditLead(null);
@@ -91,22 +90,13 @@ function Leads({ leads, setLeads, setActivities }) {
 
       setLeads([...leads, newLead]);
 
-      setActivities((prev) => [
-        {
-          text: `Added lead: ${name} (${status})`,
-          time: new Date(),
-        },
-        ...prev,
-      ]);
+      // 🔥 AI STYLE FLOW
+      logActivity(`Calling ${name}...`);
+      logActivity(`User responded: ${status}`);
+      logActivity(`Lead marked as ${status.toUpperCase()} 🔥`);
 
       if (followUpDate) {
-        setActivities((prev) => [
-          {
-            text: `Follow-up set for ${name} on ${followUpDate}`,
-            time: new Date(),
-          },
-          ...prev,
-        ]);
+        logActivity(`AI scheduled follow-up for ${name} on ${followUpDate}`);
       }
     }
 
@@ -123,13 +113,8 @@ function Leads({ leads, setLeads, setActivities }) {
 
     setLeads(leads.filter((lead) => lead.phone !== phone));
 
-    setActivities((prev) => [
-      {
-        text: `Deleted lead: ${leadToDelete.name}`,
-        time: new Date(),
-      },
-      ...prev,
-    ]);
+    // 🔥 AI STYLE LOG
+    logActivity(`AI removed lead: ${leadToDelete.name}`);
   };
 
   // ✅ FILTER + SEARCH
@@ -144,7 +129,7 @@ function Leads({ leads, setLeads, setActivities }) {
     return matchesSearch && matchesFilter;
   });
 
-  // 🔥 STEP 1 — SMART FOLLOW-UP LOGIC
+  // 🔥 FOLLOW-UP STATUS
   const getFollowUpStatus = (date) => {
     if (!date) return "none";
 
@@ -154,9 +139,9 @@ function Leads({ leads, setLeads, setActivities }) {
     today.setHours(0, 0, 0, 0);
     d.setHours(0, 0, 0, 0);
 
-    if (d < today) return "overdue";     // 🔴
-    if (d.getTime() === today.getTime()) return "today"; // 🟡
-    return "upcoming"; // 🟢
+    if (d < today) return "overdue";
+    if (d.getTime() === today.getTime()) return "today";
+    return "upcoming";
   };
 
   return (
@@ -182,7 +167,6 @@ function Leads({ leads, setLeads, setActivities }) {
         </select>
       </div>
 
-      {/* MAIN LAYOUT */}
       <div className="leads-container">
 
         {/* LEFT */}
@@ -231,7 +215,6 @@ function Leads({ leads, setLeads, setActivities }) {
                   {" "}{lead.status}
                 </span>
 
-                {/* 🔥 STEP 2 — SMART FOLLOW-UP UI */}
                 {lead.followUpDate && (
                   <span className={`follow-tag ${getFollowUpStatus(lead.followUpDate)}`}>
                     📅 {lead.followUpDate}
