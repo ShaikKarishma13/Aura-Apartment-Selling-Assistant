@@ -62,24 +62,39 @@ function Dashboard({ leads = [], activities = [] }) {
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
+                  <th>Budget</th>
+                  <th>Location</th>
                   <th>Status</th>
+                  <th>Last Contacted</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {leads.length === 0 ? (
                   <tr>
-                    <td colSpan="3">No leads yet</td>
+                    <td colSpan="7">No leads yet</td>
                   </tr>
                 ) : (
                   leads.slice(-5).reverse().map((lead) => (
                     <tr key={lead.phone}>
                       <td>{lead.name}</td>
                       <td>{lead.phone}</td>
+
+                      <td>{lead.budget || "—"}</td>
+                      <td>{lead.location || "—"}</td>
+
                       <td>
                         <span className={`status ${lead.status.toLowerCase()}`}>
                           {lead.status}
                         </span>
+                      </td>
+
+                      <td>{lead.lastContact || "—"}</td>
+
+                      <td>
+                        <button className="view-btn">👁</button>
+                        <button className="delete-btn">❌</button>
                       </td>
                     </tr>
                   ))
