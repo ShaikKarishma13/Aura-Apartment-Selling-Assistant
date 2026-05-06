@@ -9,6 +9,11 @@ function Leads({ leads, setLeads, setActivities }) {
   const [search, setSearch] = useState("");
   const [editLead, setEditLead] = useState(null);
   const [followUpDate, setFollowUpDate] = useState("");
+  const [budgetFilter, setBudgetFilter] = useState("All");
+  const [locationFilter, setLocationFilter] = useState("All");
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [budget, setBudget] = useState("");
+  const [location, setLocation] = useState("");
 
   // 🔥 HELPER → AI STYLE LOG
   const logActivity = (message) => {
@@ -27,6 +32,8 @@ function Leads({ leads, setLeads, setActivities }) {
     setName(lead.name);
     setPhone(lead.phone);
     setStatus(lead.status);
+    setBudget(lead.budget || "");
+    setLocation(lead.location || "");
     setFollowUpDate(lead.followUpDate || "");
   };
 
@@ -56,6 +63,8 @@ function Leads({ leads, setLeads, setActivities }) {
               name,
               phone,
               status,
+              budget: budget || "Low",
+              location: location || "Hyderabad",
               followUpDate: followUpDate || null,
             }
           : l
@@ -84,6 +93,8 @@ function Leads({ leads, setLeads, setActivities }) {
         name,
         phone,
         status,
+        budget: budget || "Low",
+        location: location || "Hyderabad",
         createdAt: new Date(),
         followUpDate: followUpDate || null,
       };
@@ -105,6 +116,8 @@ function Leads({ leads, setLeads, setActivities }) {
     setPhone("");
     setStatus("Hot");
     setFollowUpDate("");
+    setBudget("");
+    setLocation("");
   };
 
   // ✅ DELETE
@@ -119,15 +132,21 @@ function Leads({ leads, setLeads, setActivities }) {
 
   // ✅ FILTER + SEARCH
   const filteredLeads = leads.filter((lead) => {
-    const matchesSearch =
-      lead.name.toLowerCase().includes(search.toLowerCase()) ||
-      lead.phone.includes(search);
+  const matchesSearch =
+    lead.name.toLowerCase().includes(search.toLowerCase()) ||
+    lead.phone.includes(search);
 
-    const matchesFilter =
-      filter === "All" || lead.status === filter;
+  const matchesFilter =
+    filter === "All" || lead.status === filter;
 
-    return matchesSearch && matchesFilter;
-  });
+  const matchesBudget =
+    budgetFilter === "All" || lead.budget === budgetFilter;
+
+  const matchesLocation =
+    locationFilter === "All" || lead.location === locationFilter;
+
+  return matchesSearch && matchesFilter && matchesBudget && matchesLocation;
+});
 
   // 🔥 FOLLOW-UP STATUS
   const getFollowUpStatus = (date) => {
@@ -158,14 +177,37 @@ function Leads({ leads, setLeads, setActivities }) {
       />
 
       {/* FILTER */}
-      <div style={{ marginBottom: "15px" }}>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="All">All Leads</option>
-          <option value="Hot">🔥 Hot</option>
-          <option value="Warm">🌤️ Warm</option>
-          <option value="Cold">❄️ Cold</option>
-        </select>
-      </div>
+      <div className="filters-row">
+
+  <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+    <option value="All">All Leads</option>
+    <option value="Hot">🔥 Hot</option>
+    <option value="Warm">🌤️ Warm</option>
+    <option value="Cold">❄️ Cold</option>
+  </select>
+
+  
+  <select value={budgetFilter} onChange={(e) => setBudgetFilter(e.target.value)}>
+    <option value="All">All Budget</option>
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+  </select>
+  
+  
+
+
+  
+  <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+    <option value="All">All Location</option>
+    <option value="Hyderabad">Hyderabad</option>
+    <option value="Bangalore">Bangalore</option>
+    <option value="Mumbai">Mumbai</option>
+  </select>
+  
+  
+
+</div>
 
       <div className="leads-container">
 
@@ -200,6 +242,19 @@ function Leads({ leads, setLeads, setActivities }) {
               value={followUpDate || ""}
               onChange={(e) => setFollowUpDate(e.target.value)}
             />
+            <select value={budget} onChange={(e) => setBudget(e.target.value)}>
+  <option value="">Select Budget</option>
+  <option value="Low">Low</option>
+  <option value="Medium">Medium</option>
+  <option value="High">High</option>
+</select>
+
+<select value={location} onChange={(e) => setLocation(e.target.value)}>
+  <option value="">Select Location</option>
+  <option value="Hyderabad">Hyderabad</option>
+  <option value="Bangalore">Bangalore</option>
+  <option value="Mumbai">Mumbai</option>
+</select>
 
             <button onClick={handleSave}>
               {editLead ? "Update Lead" : "Add Lead"}
@@ -208,7 +263,11 @@ function Leads({ leads, setLeads, setActivities }) {
 
           {/* LIST */}
           {filteredLeads.map((lead) => (
-            <div key={lead.phone} className="lead-item">
+            <div
+             key={lead.phone} 
+             className="lead-item"
+             onClick={() => setSelectedLead(lead)}
+             >
               <span>
                 {lead.name} ({lead.phone})
                 <span className={`status ${lead.status.toLowerCase()}`}>
@@ -223,8 +282,8 @@ function Leads({ leads, setLeads, setActivities }) {
               </span>
 
               <div>
-                <button onClick={() => startEdit(lead)}>✏️</button>
-                <button onClick={() => handleDelete(lead.phone)}>❌</button>
+                <button onClick={(e) => { e.stopPropagation(); startEdit(lead); }}>✏️</button>
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(lead.phone); }}>❌</button>
               </div>
             </div>
           ))}
@@ -233,11 +292,43 @@ function Leads({ leads, setLeads, setActivities }) {
 
         {/* RIGHT */}
         <div className="leads-right">
-          <PieChartSection leads={leads} setFilter={setFilter} />
+
+  {/* TOP → CHART */}
+  <div className="chart-box">
+    <PieChartSection leads={leads} setFilter={setFilter} />
+  </div>
+
+  {/* BOTTOM → LEAD DETAIL */}
+  {selectedLead && (
+    <div className="lead-detail">
+      <h3>Lead Details 👤</h3>
+
+      <p><b>Name:</b> {selectedLead.name}</p>
+      <p><b>Phone:</b> {selectedLead.phone}</p>
+      <p><b>Status:</b> {selectedLead.status}</p>
+
+      <hr />
+
+      <h4>Call History 📞</h4>
+      <p>10:30 AM - 2 min - Interested</p>
+      <p>Yesterday - No Response</p>
+
+      <hr />
+
+      <h4>Conversation 💬</h4>
+      <div className="chat-box">
+        <p><b>AI:</b> Hello, looking for apartment?</p>
+        <p><b>User:</b> Yes, 2BHK</p>
+        <p><b>AI:</b> Suggesting options...</p>
+      </div>
+    </div>
+  )}
+
+</div>
         </div>
 
       </div>
-    </div>
+    
   );
 }
 

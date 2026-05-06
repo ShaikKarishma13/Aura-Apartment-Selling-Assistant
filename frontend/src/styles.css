@@ -591,3 +591,19 @@ h1 {
 .logout:hover {
   background: rgba(255,255,255,0.1);
 }
+.chart-box {
+  margin-bottom: 20px;
+}
+
+.lead-detail {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.chat-box {
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 14px;
+}
