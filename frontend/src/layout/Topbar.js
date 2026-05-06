@@ -1,38 +1,73 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ added
+import { useNavigate } from "react-router-dom";
 
-function Topbar() {
+function Topbar({ searchQuery, setSearchQuery }) {
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  const navigate = useNavigate(); // ✅ added
+  const navigate = useNavigate();
 
-  // ✅ Step 3: Logout function
   const handleLogout = () => {
-    localStorage.clear(); // future ready
+    localStorage.clear();
     navigate("/");
   };
 
-  // ✅ Step 2: Go to settings
   const goToSettings = () => {
     navigate("/settings");
+  };
+
+  // ✅ HANDLE SEARCH
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+
+    // 👉 Auto redirect to Leads page when typing
+    if (value.trim() !== "") {
+      navigate("/leads");
+    }
+  };
+
+  // ✅ CLEAR SEARCH
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   return (
     <div className="topbar">
 
-      {/* LEFT */}
-      <input type="text" placeholder="Search..." className="search-bar" />
+      {/* 🔹 LEFT SECTION */}
+      <div className="topbar-left">
 
-      {/* RIGHT SIDE */}
+        <div className="search-wrapper">
+          <input
+            type="text"
+            placeholder="Search leads..."
+            className="search-bar"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+
+          {/* ❌ CLEAR BUTTON */}
+          {searchQuery && (
+            <span className="clear-btn" onClick={clearSearch}>
+              ❌
+            </span>
+          )}
+        </div>
+
+      </div>
+
+      {/* 🔹 RIGHT SECTION */}
       <div className="topbar-right">
 
         {/* 🔔 NOTIFICATIONS */}
         <div className="icon-wrapper">
-          <span onClick={() => {
-            setShowNotif(!showNotif);
-            setShowProfile(false);
-          }}>
+          <span
+            className="icon"
+            onClick={() => {
+              setShowNotif(!showNotif);
+              setShowProfile(false);
+            }}
+          >
             🔔
           </span>
 
@@ -47,18 +82,21 @@ function Topbar() {
 
         {/* 👤 PROFILE */}
         <div className="icon-wrapper">
-          <span onClick={() => {
-            setShowProfile(!showProfile);
-            setShowNotif(false);
-          }}>
+          <span
+            className="icon"
+            onClick={() => {
+              setShowProfile(!showProfile);
+              setShowNotif(false);
+            }}
+          >
             👤
           </span>
 
           {showProfile && (
             <div className="dropdown">
               <p>My Profile</p>
-              <p onClick={goToSettings}>Settings</p> {/* ✅ fixed */}
-              <p onClick={handleLogout}>Logout</p>   {/* ✅ fixed */}
+              <p onClick={goToSettings}>Settings</p>
+              <p onClick={handleLogout}>Logout</p>
             </div>
           )}
         </div>

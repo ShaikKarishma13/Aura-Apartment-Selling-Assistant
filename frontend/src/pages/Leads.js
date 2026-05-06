@@ -1,12 +1,12 @@
 import { useState } from "react";
 import PieChartSection from "../components/PieChartSection";
 
-function Leads({ leads, setLeads, setActivities }) {
+function Leads({ leads, setLeads, setActivities, searchQuery }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("Hot");
   const [filter, setFilter] = useState("All");
-  const [search, setSearch] = useState("");
+
   const [editLead, setEditLead] = useState(null);
   const [followUpDate, setFollowUpDate] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("All");
@@ -15,18 +15,15 @@ function Leads({ leads, setLeads, setActivities }) {
   const [budget, setBudget] = useState("");
   const [location, setLocation] = useState("");
 
-  // 🔥 HELPER → AI STYLE LOG
+  // 🔥 ACTIVITY LOG
   const logActivity = (message) => {
     setActivities((prev) => [
-      {
-        text: message,
-        time: new Date(),
-      },
+      { text: message, time: new Date() },
       ...prev,
     ]);
   };
 
-  // ✅ START EDIT
+  // ✅ EDIT
   const startEdit = (lead) => {
     setEditLead(lead);
     setName(lead.name);
@@ -37,7 +34,7 @@ function Leads({ leads, setLeads, setActivities }) {
     setFollowUpDate(lead.followUpDate || "");
   };
 
-  // ✅ ADD / EDIT
+  // ✅ SAVE
   const handleSave = () => {
     if (!name.trim() || !phone.trim()) {
       alert("All fields required");
@@ -54,9 +51,9 @@ function Leads({ leads, setLeads, setActivities }) {
       return;
     }
 
-    // ===== EDIT MODE =====
+    // EDIT
     if (editLead) {
-      const updatedLeads = leads.map((l) =>
+      const updated = leads.map((l) =>
         l.phone === editLead.phone
           ? {
               ...l,
@@ -70,22 +67,20 @@ function Leads({ leads, setLeads, setActivities }) {
           : l
       );
 
-      setLeads(updatedLeads);
+      setLeads(updated);
+      logActivity(`AI updated lead ${name} → Status ${status}`);
 
-      // 🔥 AI STYLE LOGS
-      logActivity(`AI updated lead ${name} → Status changed to ${status}`);
-      
       if (followUpDate) {
-        logActivity(`Follow-up scheduled for ${name} on ${followUpDate}`);
+        logActivity(`Follow-up for ${name} on ${followUpDate}`);
       }
 
       setEditLead(null);
     }
 
-    // ===== ADD MODE =====
+    // ADD
     else {
-      if (leads.some((lead) => lead.phone === phone)) {
-        alert("Duplicate phone number not allowed");
+      if (leads.some((l) => l.phone === phone)) {
+        alert("Duplicate phone not allowed");
         return;
       }
 
@@ -101,13 +96,12 @@ function Leads({ leads, setLeads, setActivities }) {
 
       setLeads([...leads, newLead]);
 
-      // 🔥 AI STYLE FLOW
       logActivity(`Calling ${name}...`);
       logActivity(`User responded: ${status}`);
-      logActivity(`Lead marked as ${status.toUpperCase()} 🔥`);
+      logActivity(`Lead marked ${status.toUpperCase()} 🔥`);
 
       if (followUpDate) {
-        logActivity(`AI scheduled follow-up for ${name} on ${followUpDate}`);
+        logActivity(`Follow-up set for ${name}`);
       }
     }
 
@@ -122,33 +116,36 @@ function Leads({ leads, setLeads, setActivities }) {
 
   // ✅ DELETE
   const handleDelete = (phone) => {
-    const leadToDelete = leads.find((l) => l.phone === phone);
-
-    setLeads(leads.filter((lead) => lead.phone !== phone));
-
-    // 🔥 AI STYLE LOG
-    logActivity(`AI removed lead: ${leadToDelete.name}`);
+    const lead = leads.find((l) => l.phone === phone);
+    setLeads(leads.filter((l) => l.phone !== phone));
+    logActivity(`AI removed ${lead.name}`);
   };
 
-  // ✅ FILTER + SEARCH
+  // ✅ GLOBAL SEARCH + FILTER
   const filteredLeads = leads.filter((lead) => {
-  const matchesSearch =
-    lead.name.toLowerCase().includes(search.toLowerCase()) ||
-    lead.phone.includes(search);
+    const matchesSearch =
+      !searchQuery ||
+      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.phone.includes(searchQuery);
 
-  const matchesFilter =
-    filter === "All" || lead.status === filter;
+    const matchesFilter =
+      filter === "All" || lead.status === filter;
 
-  const matchesBudget =
-    budgetFilter === "All" || lead.budget === budgetFilter;
+    const matchesBudget =
+      budgetFilter === "All" || lead.budget === budgetFilter;
 
-  const matchesLocation =
-    locationFilter === "All" || lead.location === locationFilter;
+    const matchesLocation =
+      locationFilter === "All" || lead.location === locationFilter;
 
-  return matchesSearch && matchesFilter && matchesBudget && matchesLocation;
-});
+    return (
+      matchesSearch &&
+      matchesFilter &&
+      matchesBudget &&
+      matchesLocation
+    );
+  });
 
-  // 🔥 FOLLOW-UP STATUS
+  // FOLLOW STATUS
   const getFollowUpStatus = (date) => {
     if (!date) return "none";
 
@@ -167,47 +164,31 @@ function Leads({ leads, setLeads, setActivities }) {
     <div className="main-content">
       <h1>Leads Management 📋</h1>
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search by name or number..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
-      />
-
-      {/* FILTER */}
+      {/* FILTERS */}
       <div className="filters-row">
 
-  <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-    <option value="All">All Leads</option>
-    <option value="Hot">🔥 Hot</option>
-    <option value="Warm">🌤️ Warm</option>
-    <option value="Cold">❄️ Cold</option>
-  </select>
+        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="All">All Leads</option>
+          <option value="Hot">🔥 Hot</option>
+          <option value="Warm">🌤️ Warm</option>
+          <option value="Cold">❄️ Cold</option>
+        </select>
 
-  
-  <select value={budgetFilter} onChange={(e) => setBudgetFilter(e.target.value)}>
-    <option value="All">All Budget</option>
-    <option value="Low">Low</option>
-    <option value="Medium">Medium</option>
-    <option value="High">High</option>
-  </select>
-  
-  
+        <select value={budgetFilter} onChange={(e) => setBudgetFilter(e.target.value)}>
+          <option value="All">All Budget</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
 
+        <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+          <option value="All">All Location</option>
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Mumbai">Mumbai</option>
+        </select>
 
-  
-  <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-    <option value="All">All Location</option>
-    <option value="Hyderabad">Hyderabad</option>
-    <option value="Bangalore">Bangalore</option>
-    <option value="Mumbai">Mumbai</option>
-  </select>
-  
-  
-
-</div>
+      </div>
 
       <div className="leads-container">
 
@@ -216,62 +197,43 @@ function Leads({ leads, setLeads, setActivities }) {
 
           {/* FORM */}
           <div className="lead-form">
-            <input
-              type="text"
-              placeholder="Enter Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-
-            <input
-              type="text"
-              placeholder="Enter Phone"
-              value={phone}
-              maxLength={10}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={10} placeholder="Phone" />
 
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="Hot">🔥 Hot</option>
-              <option value="Warm">🌤️ Warm</option>
-              <option value="Cold">❄️ Cold</option>
+              <option value="Hot">Hot</option>
+              <option value="Warm">Warm</option>
+              <option value="Cold">Cold</option>
             </select>
 
-            <input
-              type="date"
-              value={followUpDate || ""}
-              onChange={(e) => setFollowUpDate(e.target.value)}
-            />
-            <select value={budget} onChange={(e) => setBudget(e.target.value)}>
-  <option value="">Select Budget</option>
-  <option value="Low">Low</option>
-  <option value="Medium">Medium</option>
-  <option value="High">High</option>
-</select>
+            <input type="date" value={followUpDate || ""} onChange={(e) => setFollowUpDate(e.target.value)} />
 
-<select value={location} onChange={(e) => setLocation(e.target.value)}>
-  <option value="">Select Location</option>
-  <option value="Hyderabad">Hyderabad</option>
-  <option value="Bangalore">Bangalore</option>
-  <option value="Mumbai">Mumbai</option>
-</select>
+            <select value={budget} onChange={(e) => setBudget(e.target.value)}>
+              <option value="">Budget</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+
+            <select value={location} onChange={(e) => setLocation(e.target.value)}>
+              <option value="">Location</option>
+              <option>Hyderabad</option>
+              <option>Bangalore</option>
+              <option>Mumbai</option>
+            </select>
 
             <button onClick={handleSave}>
-              {editLead ? "Update Lead" : "Add Lead"}
+              {editLead ? "Update" : "Add"}
             </button>
           </div>
 
           {/* LIST */}
           {filteredLeads.map((lead) => (
-            <div
-             key={lead.phone} 
-             className="lead-item"
-             onClick={() => setSelectedLead(lead)}
-             >
+            <div key={lead.phone} className="lead-item" onClick={() => setSelectedLead(lead)}>
               <span>
                 {lead.name} ({lead.phone})
                 <span className={`status ${lead.status.toLowerCase()}`}>
-                  {" "}{lead.status}
+                  {lead.status}
                 </span>
 
                 {lead.followUpDate && (
@@ -293,42 +255,23 @@ function Leads({ leads, setLeads, setActivities }) {
         {/* RIGHT */}
         <div className="leads-right">
 
-  {/* TOP → CHART */}
-  <div className="chart-box">
-    <PieChartSection leads={leads} setFilter={setFilter} />
-  </div>
+          <div className="chart-box">
+            <PieChartSection leads={leads} setFilter={setFilter} />
+          </div>
 
-  {/* BOTTOM → LEAD DETAIL */}
-  {selectedLead && (
-    <div className="lead-detail">
-      <h3>Lead Details 👤</h3>
+          {selectedLead && (
+            <div className="lead-detail">
+              <h3>Lead Details 👤</h3>
+              <p><b>Name:</b> {selectedLead.name}</p>
+              <p><b>Phone:</b> {selectedLead.phone}</p>
+              <p><b>Status:</b> {selectedLead.status}</p>
+            </div>
+          )}
 
-      <p><b>Name:</b> {selectedLead.name}</p>
-      <p><b>Phone:</b> {selectedLead.phone}</p>
-      <p><b>Status:</b> {selectedLead.status}</p>
-
-      <hr />
-
-      <h4>Call History 📞</h4>
-      <p>10:30 AM - 2 min - Interested</p>
-      <p>Yesterday - No Response</p>
-
-      <hr />
-
-      <h4>Conversation 💬</h4>
-      <div className="chat-box">
-        <p><b>AI:</b> Hello, looking for apartment?</p>
-        <p><b>User:</b> Yes, 2BHK</p>
-        <p><b>AI:</b> Suggesting options...</p>
-      </div>
-    </div>
-  )}
-
-</div>
         </div>
 
       </div>
-    
+    </div>
   );
 }
 

@@ -4,16 +4,39 @@ import { useNavigate } from "react-router-dom";
 function Auth() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleEnter = () => {
-    if (!email) {
-      alert("Email is required");
-      return;
-    }
+  if (!email.trim()) {
+    alert("Email is required");
+    return;
+  }
 
+  // ✅ Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    alert("Enter a valid email (example: name@gmail.com)");
+    return;
+  }
+
+  // ✅ Optional name validation (only letters)
+  if (name && !/^[a-zA-Z ]+$/.test(name)) {
+    alert("Name should contain only letters");
+    return;
+  }
+
+  localStorage.setItem("userEmail", email);
+  localStorage.setItem("userName", name || "User");
+
+  setLoading(true);
+
+  setTimeout(() => {
     navigate("/dashboard");
-  };
+  }, 1500);
+};
 
   return (
     <div>
@@ -41,8 +64,8 @@ function Auth() {
           />
           <br /><br />
 
-          <button onClick={handleEnter}>
-            Enter Dashboard
+          <button onClick={handleEnter} disabled={loading}>
+            {loading ? "Initializing AI Agent..." : "Enter Dashboard"}
           </button>
         </div>
       </div>

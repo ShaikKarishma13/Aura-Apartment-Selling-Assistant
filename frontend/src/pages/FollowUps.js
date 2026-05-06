@@ -29,13 +29,13 @@ function FollowUps({ leads = [] }) {
       <div className="main-content">
         <Topbar />
 
-       
+        <div className="followups-page-wrap">
+          <h1 className="followups-page-title">Follow-ups 📅</h1>
 
-        <h1>Follow-ups 📅</h1>
-
-        <Section title="Overdue 🔴" leads={overdue} />
-        <Section title="Today 🟡" leads={todayList} />
-        <Section title="Upcoming 🟢" leads={upcoming} />
+          <Section title="Overdue 🔴" leads={overdue} />
+          <Section title="Today 🟡" leads={todayList} />
+          <Section title="Upcoming 🟢" leads={upcoming} />
+        </div>
       </div>
     </div>
   );
@@ -54,7 +54,8 @@ function Section({ title, leads }) {
             <span>
               <b>{lead.name}</b> ({lead.phone})
               <span className={`status ${lead.status.toLowerCase()}`}>
-                {" "}{lead.status}
+                {" "}
+                {lead.status}
               </span>
             </span>
 

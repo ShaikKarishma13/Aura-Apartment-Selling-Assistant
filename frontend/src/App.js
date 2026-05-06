@@ -7,11 +7,20 @@ import Leads from "./pages/Leads";
 import FollowUps from "./pages/FollowUps";
 import Settings from "./pages/Settings";
 import Analytics from "./pages/Analytics";
-import Calls from "./pages/Calls"; // ✅ FIXED (capital C)
+import Calls from "./pages/Calls";
 
 function App() {
   const [leads, setLeads] = useState([]);
   const [activities, setActivities] = useState([]);
+
+  // ✅ GLOBAL SEARCH STATE
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ CALLS
+  const [calls, setCalls] = useState([
+    { id: 1, name: "A", status: "Talking", time: 10, sentiment: "Positive" },
+    { id: 2, name: "B", status: "Ringing", time: 5, sentiment: "Neutral" }
+  ]);
 
   return (
     <BrowserRouter>
@@ -21,7 +30,15 @@ function App() {
 
         <Route
           path="/dashboard"
-          element={<Dashboard leads={leads} activities={activities} />}
+          element={
+            <Dashboard
+              leads={leads}
+              activities={activities}
+              calls={calls}
+              searchQuery={searchQuery}   // ✅ PASS
+              setSearchQuery={setSearchQuery}
+            />
+          }
         />
 
         <Route
@@ -31,29 +48,56 @@ function App() {
               leads={leads}
               setLeads={setLeads}
               setActivities={setActivities}
+              searchQuery={searchQuery}   // ✅ PASS
+              setSearchQuery={setSearchQuery}
             />
           }
         />
 
         <Route
           path="/follow-ups"
-          element={<FollowUps leads={leads} />}
+          element={
+            <FollowUps
+              leads={leads}
+              searchQuery={searchQuery}   // (optional future use)
+              setSearchQuery={setSearchQuery}
+            />
+          }
         />
 
         <Route
           path="/settings"
-          element={<Settings />}
+          element={
+            <Settings
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          }
         />
 
         <Route
           path="/analytics"
-          element={<Analytics leads={leads} />}
+          element={
+            <Analytics
+              leads={leads}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          }
         />
 
-        {/* ✅ ADD CALLS ROUTE */}
         <Route
           path="/calls"
-          element={<Calls />}
+          element={
+            <Calls
+              calls={calls}
+              setCalls={setCalls}
+              setActivities={setActivities}
+              setLeads={setLeads}
+              searchQuery={searchQuery}   // ✅ PASS
+              setSearchQuery={setSearchQuery}
+            />
+          }
         />
 
       </Routes>

@@ -1,5 +1,5 @@
 :root {
-  --sidebar-width: 180px;
+  --sidebar-width: 170px;
 }
 
 body {
@@ -9,6 +9,16 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
 }
+.page-wrap {
+  padding-left: 25px;   /* spacing from sidebar */
+  padding-right: 20px;
+}
+
+.page-title {
+  margin-bottom: 20px;
+  color: white;
+}
+
 
 /* ================= NAVBAR ================= */
 .navbar {
@@ -113,6 +123,7 @@ body {
 /* ================= MAIN CONTENT ================= */
 .main-content {
   margin-left: var(--sidebar-width);
+  padding-left: 30px;
   padding: 30px 40px;
   width: calc(100% - var(--sidebar-width));
   max-width: 1200px;
@@ -120,10 +131,16 @@ body {
 
 /* ================= TOPBAR ================= */
 .topbar {
+  
+  width: 100%;
+  padding: 10px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+}
+.topbar-left {
+  flex: 1; /* 🔥 pushes right section */
 }
 
 .topbar input {
@@ -139,6 +156,65 @@ body {
   font-size: 20px;
   color: white;
 }
+/* SEARCH */
+.search-bar {
+  width: 300px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgb(255, 255, 255);
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.search-wrapper {
+  position: relative;
+  width: 250px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+/* RIGHT SIDE ICONS */
+.topbar-right {
+  margin-left: auto;
+  align-items: center;
+  gap: 18px;
+  display: flex;
+  gap: 15px;
+}
+
+.icon {
+  font-size: 18px;
+  cursor: pointer;
+}
+.icon-wrapper {
+  position: relative;
+}
+.dropdown {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  background: rgba(20,20,30,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 150px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 100;
+}
+
+.dropdown p {
+  margin: 5px 0;
+  cursor: pointer;
+}
+
+.dropdown p:hover {
+  color: #00f5ff;
+}
+
 
 /* ================= HEADINGS ================= */
 h1 {
@@ -310,38 +386,53 @@ h1 {
 
 /* LEFT TABLE */
 .leads-table {
+  margin-top: 20px;
   flex: 2;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 16px;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
   color: white;
 }
-
+/* Table styling */
 .leads-table table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
 }
-
+/* Table cells */
 .leads-table th,
 .leads-table td {
   padding: 10px;
   text-align: left;
 }
-
+/* Row divider */
 .leads-table tr {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+/* Hover effect */
+.leads-table:hover {
+  transform: translateY(-3px);
 }
 
 /* RIGHT ACTIVITY */
 .activity-feed {
+  margin-top: 20px;
   flex: 1;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 16px;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
   color: white;
+}
+/* Hover effect  */
+.leads-table:hover,
+.activity-feed:hover {
+  transform: translateY(-3px);
 }
 
 .activity-item {
@@ -355,10 +446,20 @@ h1 {
 }
 .follow-tag {
   margin-left: 10px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 11px;
+  font-weight: 500;
   color: white;
+}
+.followups-page-title {
+  margin: 0 0 20px 20px;
+  width: fit-content;
+  color: black;
+}
+
+.followups-page-wrap {
+  padding-left: 20px;
 }
 
 .follow-tag.overdue {
@@ -375,19 +476,29 @@ h1 {
 .follow-section {
   margin-top: 30px;
   padding: 20px;
-  border-radius: 15px;
-  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
   max-width: 900px;
+  margin-left: 20px;
+  color: white;
 }
 
 .follow-item {
-  margin-top: 10px;
-  padding: 12px 15px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.1);
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: all 0.2s ease;
+}
+.follow-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .follow-item .date {
@@ -418,50 +529,83 @@ h1 {
 /* ================= SETTINGS ================= */
 
 .settings-card {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 16px;
   margin-top: 20px;
-  backdrop-filter: blur(12px);
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
   color: white;
   width: 100%;
   max-width: 700px;
 }
+.settings-card:hover {
+  transform: translateY(-3px);
+}
+.settings-card label {
+  display: block;
+  margin-top: 10px;
+}
 
 .settings-card textarea {
-  width: 100%;
+  width: 90%;
+  max-width: 600px;
   height: 100px;
+  resize: none;
   margin-top: 10px;
   padding: 10px;
   border-radius: 10px;
   border: none;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  outline: none;
 }
 
 .settings-card input,
 .settings-card select {
-  width: 100%;
+  width: 90%;
+  max-width: 600px;
   margin-top: 10px;
   padding: 10px;
   border-radius: 10px;
   border: none;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  outline: none;
+}
+
+
+/* 🔥 PLACEHOLDER  */
+.settings-card input::placeholder,
+.settings-card textarea::placeholder {
+  color: rgba(255,255,255,0.6);
 }
 
 .save-btn {
   margin-top: 30px;
-  padding: 14px 24px;
+  padding: 14px 26px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(90deg, #00f5ff, #5b86e5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
   color: white;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  transition: 0.3s;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: all 0.25s ease;
+  
 }
 
 .save-btn:hover {
-  transform: scale(1.05);
+  background: rgba(0,0,0,0.6);
+  transform: translateY(-2px);
+  
+}
+.save-btn:active {
+  transform: scale(0.96);
 }
 /* ================= ANALYTICS ================= */
 
@@ -493,48 +637,92 @@ h1 {
   gap: 20px;
   margin-top: 20px;
 }
-
+/* ===== LEFT PANEL ===== */
 .calls-left {
+  width: 30%;
   flex: 1;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
   padding: 15px;
-  border-radius: 15px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  color: white;
 }
-
+/* ===== RIGHT PANEL ===== */
 .calls-right {
+  width: 70%;
   flex: 2;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
   padding: 15px;
-  border-radius: 15px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+.call-card {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  cursor: pointer;
+}
+.call-card.active {
+  border: 2px solid #00f5ff;
 }
 
 .call-item {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .call-item:hover {
-  background: rgba(255,255,255,0.15);
-}
+  background: rgba(255,255,255,0.12);
+  transform: translateY(-2px);
 
+}
+/* ACTIVE CALL */
+.call-item.active {
+  border: 2px solid #00f5ff;
+  background: rgba(0, 245, 255, 0.1);
+}
+/* ===== TRANSCRIPT ===== */
 .transcript {
-  background: rgba(0,0,0,0.3);
-  padding: 10px;
-  border-radius: 10px;
+  background: rgba(0,0,0,0.35);
+  padding: 12px;
+  border-radius: 12px;
   margin: 10px 0;
 }
-
+/* ===== BUTTONS ===== */
 .call-actions button {
   margin-right: 10px;
-  padding: 8px 12px;
+  margin-top: 10px;
+  padding: 8px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.2s ease;
+}
+.call-actions button:nth-child(2) {
+  background: #ff4d4d;
+}
+.call-actions button:nth-child(2):hover {
+  background: #ff1a1a;
+}
+
+.call-actions button:nth-child(3) {
+  background: #4caf50;
+}
+
+.call-actions button:nth-child(3):hover {
+  background: #3e8e41;
 }
 /* TOPBAR */
 
@@ -603,7 +791,75 @@ h1 {
 }
 
 .chat-box {
+  background: rgba(255,255,255,0.08);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
   max-height: 150px;
   overflow-y: auto;
   font-size: 14px;
 }
+.insights-panel {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+.insights-panel:hover {
+  transform: translateY(-3px);
+}
+
+.insight-item {
+  margin: 8px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+/* ===== AI SECTION LAYOUT ===== */
+.ai-section {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Make both cards equal */
+.ai-section .card {
+  flex: 1;
+  min-height: 180px;
+}
+
+/* ===== AI CARDS (consistent with dashboard style) ===== */
+.ai-recommendation,
+.ai-action {
+  padding: 20px;
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.ai-recommendation:hover,
+.ai-action:hover {
+  transform: translateY(-4px);
+}
+
+/* Content spacing */
+.recommend-card {
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .ai-section {
+    flex-direction: column;
+  }
+}
+
