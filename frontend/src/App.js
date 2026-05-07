@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";   // ✅ added useEffect
 
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -10,17 +10,25 @@ import Analytics from "./pages/Analytics";
 import Calls from "./pages/Calls";
 
 function App() {
-  const [leads, setLeads] = useState([]);
-  const [activities, setActivities] = useState([]);
 
-  // ✅ GLOBAL SEARCH STATE
-  const [searchQuery, setSearchQuery] = useState("");
+  // ✅ STEP 1: Load from localStorage
+  const [leads, setLeads] = useState(() => {
+    const saved = localStorage.getItem("leads");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [activities, setActivities] = useState([]);
 
   // ✅ CALLS
   const [calls, setCalls] = useState([
-    { id: 1, name: "A", status: "Talking", time: 10, sentiment: "Positive" },
-    { id: 2, name: "B", status: "Ringing", time: 5, sentiment: "Neutral" }
+    { id: 1, name: "Zoya", status: "Talking", time: 10, sentiment: "Positive" },
+    { id: 2, name: "John", status: "Ringing", time: 5, sentiment: "Neutral" }
   ]);
+
+  // ✅ STEP 2: Save to localStorage whenever leads change
+  useEffect(() => {
+    localStorage.setItem("leads", JSON.stringify(leads));
+  }, [leads]);
 
   return (
     <BrowserRouter>
@@ -35,8 +43,6 @@ function App() {
               leads={leads}
               activities={activities}
               calls={calls}
-              searchQuery={searchQuery}   // ✅ PASS
-              setSearchQuery={setSearchQuery}
             />
           }
         />
@@ -48,42 +54,23 @@ function App() {
               leads={leads}
               setLeads={setLeads}
               setActivities={setActivities}
-              searchQuery={searchQuery}   // ✅ PASS
-              setSearchQuery={setSearchQuery}
             />
           }
         />
 
         <Route
           path="/follow-ups"
-          element={
-            <FollowUps
-              leads={leads}
-              searchQuery={searchQuery}   // (optional future use)
-              setSearchQuery={setSearchQuery}
-            />
-          }
+          element={<FollowUps leads={leads} />}
         />
 
         <Route
           path="/settings"
-          element={
-            <Settings
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-          }
+          element={<Settings />}
         />
 
         <Route
           path="/analytics"
-          element={
-            <Analytics
-              leads={leads}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-          }
+          element={<Analytics leads={leads} />}
         />
 
         <Route
@@ -94,8 +81,6 @@ function App() {
               setCalls={setCalls}
               setActivities={setActivities}
               setLeads={setLeads}
-              searchQuery={searchQuery}   // ✅ PASS
-              setSearchQuery={setSearchQuery}
             />
           }
         />

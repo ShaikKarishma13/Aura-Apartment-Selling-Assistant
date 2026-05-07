@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Topbar({ searchQuery, setSearchQuery }) {
+function Topbar() {
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -16,44 +16,16 @@ function Topbar({ searchQuery, setSearchQuery }) {
     navigate("/settings");
   };
 
-  // ✅ HANDLE SEARCH
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-
-    // 👉 Auto redirect to Leads page when typing
-    if (value.trim() !== "") {
-      navigate("/leads");
-    }
-  };
-
-  // ✅ CLEAR SEARCH
-  const clearSearch = () => {
-    setSearchQuery("");
-  };
-
   return (
     <div className="topbar">
 
       {/* 🔹 LEFT SECTION */}
       <div className="topbar-left">
-
-        <div className="search-wrapper">
-          <input
-            type="text"
-            placeholder="Search leads..."
-            className="search-bar"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-
-          {/* ❌ CLEAR BUTTON */}
-          {searchQuery && (
-            <span className="clear-btn" onClick={clearSearch}>
-              ❌
-            </span>
-          )}
-        </div>
-
+        <input
+          type="text"
+          placeholder="Search..."
+          className="search-bar"
+        />
       </div>
 
       {/* 🔹 RIGHT SECTION */}
