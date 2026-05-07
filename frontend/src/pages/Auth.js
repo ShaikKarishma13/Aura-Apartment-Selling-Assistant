@@ -9,34 +9,32 @@ function Auth() {
   const navigate = useNavigate();
 
   const handleEnter = () => {
-  if (!email.trim()) {
-    alert("Email is required");
-    return;
-  }
+    if (!email.trim()) {
+      alert("Email is required");
+      return;
+    }
 
-  // ✅ Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailRegex.test(email)) {
-    alert("Enter a valid email (example: name@gmail.com)");
-    return;
-  }
+    if (!emailRegex.test(email)) {
+      alert("Enter a valid email (example: name@gmail.com)");
+      return;
+    }
 
-  // ✅ Optional name validation (only letters)
-  if (name && !/^[a-zA-Z ]+$/.test(name)) {
-    alert("Name should contain only letters");
-    return;
-  }
+    if (name && !/^[a-zA-Z ]+$/.test(name)) {
+      alert("Name should contain only letters");
+      return;
+    }
 
-  localStorage.setItem("userEmail", email);
-  localStorage.setItem("userName", name || "User");
+    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userName", name || "User");
 
-  setLoading(true);
+    setLoading(true);
 
-  setTimeout(() => {
-    navigate("/dashboard");
-  }, 1500);
-};
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1500);
+  };
 
   return (
     <div>
@@ -45,7 +43,8 @@ function Auth() {
       </div>
 
       <div className="main">
-        <div className="container">
+        {/* 🔥 UPDATED CONTAINER */}
+        <div className="auth-box">
           <h1>Welcome</h1>
 
           <input
@@ -54,7 +53,6 @@ function Auth() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <br /><br />
 
           <input
             type="text"
@@ -62,9 +60,8 @@ function Auth() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <br /><br />
 
-          <button onClick={handleEnter} disabled={loading}>
+          <button className="auth-btn" onClick={handleEnter} disabled={loading}>
             {loading ? "Initializing AI Agent..." : "Enter Dashboard"}
           </button>
         </div>

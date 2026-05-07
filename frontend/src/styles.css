@@ -24,6 +24,61 @@ body {
               box-shadow 0.3s ease,
               transform 0.3s ease;
 } 
+.auth-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  border-radius: 20px;
+  
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  transition: 0.3s ease;
+}
+.auth-box:hover {
+  transform: translateY(-4px);
+}
+
+
+.auth-box input {
+  width: 300px;
+  margin: 10px 0;
+  align-items: center;
+  border-radius: 10px;
+  padding: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  color: black;
+}
+.auth-box button {
+  width: 300px;
+  margin: 10px 0;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+}
+.auth-btn {
+  width: 300px;
+  padding: 12px;
+  margin-top: 15px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+  color: white;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.auth-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+}
 
 
 /* ================= NAVBAR ================= */
@@ -41,7 +96,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  height: calc(100vh - 70px);
   position: relative;
   background-image: url("./assets/agent.png");
   background-repeat: no-repeat;
