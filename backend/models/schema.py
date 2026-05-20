@@ -22,16 +22,27 @@ class Property(Base):
 
 class LeadStatus(Base):
     __tablename__ = 'lead_status'
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    status = Column(String) # (hot/warm/cold)
-    score = Column(Integer)
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey('users.id'),
+        nullable=True
+    )
+
+    status = Column(String)
+
+    score = Column(Integer)
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now()
+    )
 class Interaction(Base):
     __tablename__ = 'interactions'
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     message = Column(Text)
     response = Column(Text)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())

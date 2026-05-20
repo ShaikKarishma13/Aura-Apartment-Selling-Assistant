@@ -37,7 +37,7 @@ async def classify_lead(history: list) -> dict:
         
         response = await client.chat.completions.create(
             messages=messages,
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             temperature=0.1, # Low temperature forces deterministic JSON format
             response_format={"type": "json_object"}
         )
