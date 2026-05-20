@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PieChartSection from "../components/PieChartSection";
+import axios from "axios";
 
 function Leads({ leads, setLeads, setActivities }) {
   const [name, setName] = useState("");
@@ -89,22 +90,43 @@ function Leads({ leads, setLeads, setActivities }) {
         return;
       }
 
-      const newLead = {
-        name,
-        phone,
-        status,
-        budget: budget || "Low",
-        location: location || "Hyderabad",
-        createdAt: new Date(),
-        followUpDate: followUpDate || null,
-      };
+      const saveLeadToBackend = async () => {
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/chat/process-input",
+      {
+        session_id: phone,
+        user_input: `Hi, I am ${name}. Looking for apartment in ${location} with ${budget} budget.`,
+        history: [],
+      }
+    );
 
-      setLeads([...leads, newLead]);
+    console.log(response.data);
 
-      // 🔥 AI STYLE FLOW
-      logActivity(`Calling ${name}...`);
-      logActivity(`User responded: ${status}`);
-      logActivity(`Lead marked as ${status.toUpperCase()} 🔥`);
+    const newLead = {
+      name,
+      phone,
+      status: response.data.detected_intent,
+      aiResponse: response.data.response_text,
+      sentiment: response.data.sentiment,
+      budget: budget || "Low",
+      location: location || "Hyderabad",
+      createdAt: new Date(),
+      followUpDate: followUpDate || null,
+    };
+
+    setLeads((prev) => [...prev, newLead]);
+
+    logActivity(`AI analyzed ${name}`);
+    logActivity(`Lead classified as ${response.data.detected_intent}`);
+
+  } catch (error) {
+    console.error(error);
+    alert("Backend connection failed");
+  }
+};
+
+saveLeadToBackend();
 
       if (followUpDate) {
         logActivity(`AI scheduled follow-up for ${name} on ${followUpDate}`);
