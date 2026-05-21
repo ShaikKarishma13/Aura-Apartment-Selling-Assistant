@@ -69,3 +69,20 @@ async def process_chat_input(
         sentiment=analysis.get("reason", "No reason provided"),
         detected_intent=analysis.get("classification", "Unknown")
     )
+@router.get("/all-leads")
+def get_all_leads(db: Session = Depends(get_db)):
+
+    interactions = db.query(Interaction).all()
+
+    leads = []
+
+    for item in interactions:
+        leads.append({
+            "id": item.id,
+            "message": item.message,
+            "response": item.response,
+            "source": item.source,
+            "timestamp": str(item.timestamp)
+        })
+
+    return leads

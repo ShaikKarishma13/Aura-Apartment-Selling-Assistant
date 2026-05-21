@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PieChartSection from "../components/PieChartSection";
 import axios from "axios";
 
@@ -15,6 +15,39 @@ function Leads({ leads, setLeads, setActivities }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [budget, setBudget] = useState("");
   const [location, setLocation] = useState("");
+  useEffect(() => {
+
+  const fetchLeads = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/api/chat/all-leads"
+      );
+
+      const backendLeads = response.data.map((item) => ({
+        name: item.message?.split(" ")[4] || "Unknown",
+        phone: "N/A",
+        status: "Warm",
+        userMessage: item.message,
+        aiResponse: item.response,
+        sentiment: "Fetched from backend",
+        budget: "Medium",
+        location: "Hyderabad",
+        createdAt: item.timestamp,
+      }));
+
+      setLeads(backendLeads);
+
+    } catch (error) {
+      console.error("Failed fetching leads", error);
+    }
+  };
+
+  fetchLeads();
+
+}, [setLeads]);
+ 
 
   // 🔥 HELPER → AI STYLE LOG
   const logActivity = (message) => {
@@ -106,6 +139,7 @@ function Leads({ leads, setLeads, setActivities }) {
     const newLead = {
       name,
       phone,
+      userMessage: `Hi, I am ${name}. Looking for apartment in ${location} with ${budget} budget.`,
       status: response.data.detected_intent,
       aiResponse: response.data.response_text,
       sentiment: response.data.sentiment,
@@ -113,6 +147,7 @@ function Leads({ leads, setLeads, setActivities }) {
       location: location || "Hyderabad",
       createdAt: new Date(),
       followUpDate: followUpDate || null,
+      
     };
 
     setLeads((prev) => [...prev, newLead]);
@@ -312,8 +347,63 @@ saveLeadToBackend();
 
         </div>
 
-        {/* RIGHT */}
         <div className="leads-right">
+
+  {selectedLead ? (
+    <div className="lead-detail">
+
+      <h2>Lead Details 👤</h2>
+
+      <p><b>Name:</b> {selectedLead.name}</p>
+
+      <p><b>Phone:</b> {selectedLead.phone}</p>
+
+      <p><b>Status:</b> {selectedLead.status}</p>
+
+      <p><b>Budget:</b> {selectedLead.budget}</p>
+
+      <p><b>Location:</b> {selectedLead.location}</p>
+
+      <hr />
+
+      <h3>AI Conversation 💬</h3>
+
+      <div
+        style={{
+          background: "#1e1e2f",
+          padding: "15px",
+          borderRadius: "10px",
+          marginTop: "10px",
+          color: "white"
+        }}
+      >
+
+        <p>
+  <b>User:</b> {selectedLead.userMessage}
+</p>
+        <p>
+          <b>AI:</b> {selectedLead.aiResponse || "No AI response"}
+        </p>
+
+      </div>
+
+      <hr />
+
+      <h3>AI Analysis 🧠</h3>
+
+      <p>
+        {selectedLead.sentiment || "No analysis"}
+      </p>
+
+    </div>
+
+  ) : (
+    <div className="lead-detail">
+      <h2>Select a lead to view details</h2>
+    </div>
+  )}
+
+</div>
 
   {/* TOP → CHART */}
   <div className="chart-box">
@@ -321,32 +411,9 @@ saveLeadToBackend();
   </div>
 
   {/* BOTTOM → LEAD DETAIL */}
-  {selectedLead && (
-    <div className="lead-detail">
-      <h3>Lead Details 👤</h3>
 
-      <p><b>Name:</b> {selectedLead.name}</p>
-      <p><b>Phone:</b> {selectedLead.phone}</p>
-      <p><b>Status:</b> {selectedLead.status}</p>
 
-      <hr />
 
-      <h4>Call History 📞</h4>
-      <p>10:30 AM - 2 min - Interested</p>
-      <p>Yesterday - No Response</p>
-
-      <hr />
-
-      <h4>Conversation 💬</h4>
-      <div className="chat-box">
-        <p><b>AI:</b> Hello, looking for apartment?</p>
-        <p><b>User:</b> Yes, 2BHK</p>
-        <p><b>AI:</b> Suggesting options...</p>
-      </div>
-    </div>
-  )}
-
-</div>
         </div>
 
       </div>

@@ -1,16 +1,36 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import Sidebar from "../layout/Sidebar";
 import Topbar from "../layout/Topbar";
 import ChartSection from "../components/ChartSection";
 
 function Dashboard({ leads = [], activities = [], calls = [] }) {
-  const totalLeads = leads.length;
+ const [stats, setStats] = useState({
+  total_leads: 0,
+  hot_leads: 0,
+  calls_today: 0,
+  conversion_rate: 0,
+});
 
-  const hotLeads = leads.filter((l) => l.status === "Hot").length;
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(
+        "http://127.0.0.1:8000/api/dashboard/stats"
+      );
 
-  const callsToday = calls.length;
+      setStats(response.data);
 
-  const conversionRate =
-    totalLeads === 0 ? 0 : Math.round((hotLeads / totalLeads) * 100);
+    } catch (error) {
+      console.error("Dashboard fetch failed", error);
+    }
+  };
+
+  fetchStats();
+}, []);
+
+ 
 
   // ================= AI INSIGHTS =================
   const getInsights = () => {
@@ -105,22 +125,22 @@ function Dashboard({ leads = [], activities = [], calls = [] }) {
           <div className="cards">
             <div className="card">
               <h3>Total Leads</h3>
-              <p>{totalLeads}</p>
+              <p>{stats.total_leads}</p>
             </div>
 
             <div className="card">
               <h3>Calls Today 📞</h3>
-              <p>{callsToday}</p>
+              <p>{stats.calls_today}</p>
             </div>
 
             <div className="card">
               <h3>Hot Leads 🔥</h3>
-              <p>{hotLeads}</p>
+              <p>{stats.hot_leads}</p>
             </div>
 
             <div className="card">
               <h3>Conversion Rate %</h3>
-              <p>{conversionRate}%</p>
+              <p>{stats.conversion_rate}%</p>
             </div>
           </div>
 

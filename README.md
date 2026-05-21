@@ -437,3 +437,5 @@ Academic team project focused on:
 - CRM workflow simulation
 - AI-assisted application planning
 - Full-stack scalable system design
+
+

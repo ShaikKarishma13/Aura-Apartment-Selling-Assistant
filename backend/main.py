@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database.db import engine, Base
 import models.schema
 from routers import chat
+from routers import dashboard
 import logging
 
 # Setup basic logging
@@ -23,7 +24,7 @@ app.add_middleware(
 
 # Mount Routers
 app.include_router(chat.router)
-
+app.include_router(dashboard.router)
 
 @app.get("/")
 def health_check():
