@@ -26,16 +26,17 @@ function Leads({ leads, setLeads, setActivities }) {
       );
 
       const backendLeads = response.data.map((item) => ({
-        name: item.message?.split(" ")[4] || "Unknown",
-        phone: "N/A",
-        status: "Warm",
-        userMessage: item.message,
-        aiResponse: item.response,
-        sentiment: "Fetched from backend",
-        budget: "Medium",
-        location: "Hyderabad",
-        createdAt: item.timestamp,
-      }));
+  name: item.name || "Unknown",
+  phone: item.phone || "N/A",
+  status: item.status || "Warm",
+  userMessage: item.message,
+  aiResponse: item.response,
+  sentiment: "Fetched from backend",
+  budget: item.budget || "Medium",
+  location: item.location || "Hyderabad",
+  createdAt: item.timestamp,
+  followUpDate: item.followUpDate || null,
+}));
 
       setLeads(backendLeads);
 
