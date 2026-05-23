@@ -239,7 +239,7 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 .topbar-left {
   flex: 1; /* 🔥 pushes right section */
@@ -291,36 +291,115 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   gap: 18px;
   display: flex;
-  gap: 15px;
+  position: relative;
 }
+/* ICONS */
+.icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+}
+.icon-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* RIGHT SIDE ICONS */
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: auto;
+  position: relative;
+}
+
+/* ICONS */
 
 .icon {
   font-size: 18px;
   cursor: pointer;
-}
-.icon-wrapper {
-  position: relative;
-}
-.dropdown {
-  position: absolute;
-  top: 35px;
-  right: 0;
-  background: rgba(20,20,30,0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 10px;
-  min-width: 150px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  z-index: 100;
+  color: white;
 }
 
-.dropdown p {
-  margin: 5px 0;
+/* ICON WRAPPER */
+
+.icon-wrapper {
+  position: relative;
   cursor: pointer;
 }
 
+/* =========================
+   GLASS DROPDOWN
+========================= */
+.dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 180px;
+  min-width: 190px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.18),
+    inset 0 1px 1px rgba(255,255,255,0.15);
+
+  overflow: hidden;
+  z-index: 999;
+  color: white;
+}
+
+/* =========================
+   DROPDOWN ITEMS
+========================= */
+.dropdown p {
+  margin: 4px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: white;
+  font-weight: 500;
+  position: relative;
+}
+
+/* =========================
+   HOVER + ACTIVE GLOW
+========================= */
 .dropdown p:hover {
-  color: #00f5ff;
+  background: rgba(255,255,255,0.16);
+
+  box-shadow:
+    0 0 12px rgba(255,255,255,0.18);
+
+  transform: translateX(2px);
+
+  color: #ffffff;
+}
+
+/* CLICK EFFECT */
+
+.dropdown p:active {
+  background: rgba(255,255,255,0.22);
+
+  box-shadow:
+    0 0 18px rgba(180,160,255,0.45);
+
+  transform: scale(0.98);
 }
 
 
@@ -989,48 +1068,7 @@ transform: translateY(-4px);
 .call-actions button:nth-child(3):hover {
   background: #3e8e41;
 }
-/* TOPBAR */
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.topbar-right {
-  display: flex;
-  gap: 20px;
-  position: relative;
-}
-
-.icon-wrapper {
-  position: relative;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-/* DROPDOWN */
-.dropdown {
-  position: absolute;
-  top: 30px;
-  right: 0;
-  background: rgba(0,0,0,0.8);
-  padding: 10px;
-  border-radius: 10px;
-  min-width: 180px;
-  color: white;
-  z-index: 100;
-}
-
-.dropdown p {
-  margin: 8px 0;
-  cursor: pointer;
-}
-
-.dropdown p:hover {
-  opacity: 0.7;
-}
 .logout {
   margin-top: auto;
   margin-bottom: 40px;
@@ -1054,22 +1092,41 @@ transform: translateY(-4px);
   margin-bottom: 20px;
 }
 
-.lead-detail {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+.lead-details {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 25px;
+  border-radius: 24px;
+  color: white;
+
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(0, 245, 255, 0.08);
+
+  transition: all 0.3s ease;
+}
+.lead-details h2,
+.lead-details p,
+.lead-details h3,
+.lead-details strong,
+.lead-details span {
+  color: white;
+}
+.lead-details * {
+  color: white;
 }
 
 .chat-box {
-  background: rgba(255,255,255,0.08);
-  padding: 10px;
-  border-radius: 10px;
-  margin-top: 10px;
-  max-height: 150px;
-  overflow-y: auto;
-  font-size: 14px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px;
+  border-radius: 18px;
+  color: white; 
 }
+
 .insights-panel {
   margin-top: 20px;
   padding: 20px;
@@ -1183,4 +1240,3 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
   
 }
-

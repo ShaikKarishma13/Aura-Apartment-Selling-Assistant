@@ -350,7 +350,7 @@ saveLeadToBackend();
         <div className="leads-right">
 
   {selectedLead ? (
-    <div className="lead-detail">
+    <div className="lead-details">
 
       <h2>Lead Details 👤</h2>
 
@@ -369,14 +369,18 @@ saveLeadToBackend();
       <h3>AI Conversation 💬</h3>
 
       <div
-        style={{
-          background: "#1e1e2f",
-          padding: "15px",
-          borderRadius: "10px",
-          marginTop: "10px",
-          color: "white"
-        }}
-      >
+  style={{
+    background: "rgba(25, 20, 60, 0.45)",
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+    padding: "15px",
+    borderRadius: "10px",
+    marginTop: "10px",
+    color: "white"
+  }}
+>
 
         <p>
   <b>User:</b> {selectedLead.userMessage}
@@ -398,7 +402,7 @@ saveLeadToBackend();
     </div>
 
   ) : (
-    <div className="lead-detail">
+    <div className="lead-details">
       <h2>Select a lead to view details</h2>
     </div>
   )}

@@ -1,11 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Topbar() {
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const dropdownRef = useRef(null);
 
   const navigate = useNavigate();
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setShowNotif(false);
+      setShowProfile(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -29,7 +47,7 @@ function Topbar() {
       </div>
 
       {/* 🔹 RIGHT SECTION */}
-      <div className="topbar-right">
+      <div className="topbar-right" ref={dropdownRef}>
 
         {/* 🔔 NOTIFICATIONS */}
         <div className="icon-wrapper">
