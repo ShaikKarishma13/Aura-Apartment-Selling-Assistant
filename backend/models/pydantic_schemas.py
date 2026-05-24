@@ -14,6 +14,8 @@ class ChatRequest(BaseModel):
     budget: str
     location: str
     status: str
+    follow_up_date: str | None = None
+    history: list[ChatMessage]
 
     history: Optional[List[ChatMessage]] = []
 

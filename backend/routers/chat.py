@@ -69,6 +69,12 @@ async def process_chat_input(
     # Save lead status
     lead_status = LeadStatus(
         user_id=new_user.id,
+        name=request.name,
+        phone=request.phone,
+        budget=request.budget,
+        location=request.location,
+        follow_up_date=request.follow_up_date,
+        ai_response=bot_response,
         status=request.status,
         score=85 if request.status == "Hot" else 60
     )
@@ -108,7 +114,7 @@ def get_all_leads(db: Session = Depends(get_db)):
             "timestamp": str(interaction.timestamp),
             "budget": user.budget,
             "location": user.location,
-            "followUpDate": str(interaction.timestamp.date())
+            "followUpDate": status.follow_up_date
         })
 
     return leads
@@ -126,6 +132,42 @@ def delete_lead(phone: str, db: Session = Depends(get_db)):
 
     db.delete(user)
 
+
     db.commit()
 
     return {"message": "Lead deleted successfully"}
+
+
+
+@router.put("/update-lead/{phone}")
+def update_lead(
+    phone: str,
+    request: ChatRequest,
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(User.phone == phone).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    # UPDATE USER
+    user.name = request.name
+    user.phone = request.phone
+    user.budget = request.budget
+    user.location = request.location
+
+    # UPDATE LEAD STATUS
+    lead_status = db.query(LeadStatus).filter(
+        LeadStatus.user_id == user.id
+    ).first()
+
+    if lead_status:
+        lead_status.status = request.status
+        lead_status.follow_up_date = request.follow_up_date
+        lead_status.budget = request.budget
+        lead_status.location = request.location
+
+    db.commit()
+
+    return {"message": "Lead updated successfully"}

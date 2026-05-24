@@ -34,8 +34,10 @@ function Leads({ leads, setLeads, setActivities }) {
   sentiment: "Fetched from backend",
   budget: item.budget || "Medium",
   location: item.location || "Hyderabad",
-  createdAt: item.timestamp,
-  followUpDate: item.followUpDate || null,
+  createdAt: item.timestamp || new Date().toISOString(),
+  followUpDate: item.followUpDate
+  ? new Date(item.followUpDate).toISOString().split("T")[0]
+   : null,
 }));
 
       setLeads(backendLeads);
@@ -91,7 +93,28 @@ function Leads({ leads, setLeads, setActivities }) {
 
     // ===== EDIT MODE =====
     if (editLead) {
-      const updatedLeads = leads.map((l) =>
+      const updateLeadInBackend =  async () => {
+        try {
+          await axios.put(
+            `http://127.0.0.1:8000/api/chat/update-lead/${editLead.phone}`,
+            {
+              session_id: phone,
+              user_input: editLead.userMessage,
+              name,
+              phone,
+              budget,
+              location,
+              status,
+              follow_up_date: followUpDate,
+              history: [],
+            }
+          );
+          const updateLeads = leads.map((l) =>
+
+
+
+
+
         l.phone === editLead.phone
           ? {
               ...l,
@@ -105,7 +128,7 @@ function Leads({ leads, setLeads, setActivities }) {
           : l
       );
 
-      setLeads(updatedLeads);
+      setLeads(updateLeads);
 
       // 🔥 AI STYLE LOGS
       logActivity(`AI updated lead ${name} → Status changed to ${status}`);
@@ -115,7 +138,15 @@ function Leads({ leads, setLeads, setActivities }) {
       }
 
       setEditLead(null);
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update lead");
     }
+  };
+  updateLeadInBackend();
+}
+
 
     // ===== ADD MODE =====
     else {
@@ -137,6 +168,7 @@ function Leads({ leads, setLeads, setActivities }) {
     budget: budget,
     location: location,
     status: status,
+    follow_up_date: followUpDate,
 
     history: [],
   }
@@ -153,7 +185,7 @@ function Leads({ leads, setLeads, setActivities }) {
       sentiment: response.data.sentiment,
       budget: budget || "Low",
       location: location || "Hyderabad",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       followUpDate: followUpDate || null,
       
     };
@@ -355,7 +387,7 @@ const handleDelete = async (phone) => {
 
                 {lead.followUpDate && (
                   <span className={`follow-tag ${getFollowUpStatus(lead.followUpDate)}`}>
-                    📅 {lead.followUpDate}
+                    📅 {new Date(lead.followUpDate).toLocaleDateString()}
                   </span>
                 )}
               </span>

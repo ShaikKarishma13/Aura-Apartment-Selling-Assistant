@@ -5,7 +5,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import FollowUps from "./pages/FollowUps";
-import Settings from "./pages/Settings";
+import Settings from "./pages/settings";
 import Analytics from "./pages/Analytics";
 import Calls from "./pages/Calls";
 

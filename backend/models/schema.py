@@ -30,6 +30,14 @@ class LeadStatus(Base):
         ForeignKey('users.id'),
         nullable=True
     )
+    name = Column(String)
+    phone = Column(String)
+    budget = Column(String)
+    location = Column(String)
+
+    follow_up_date = Column(String)
+    
+    ai_response = Column(Text)
 
     status = Column(String)
 

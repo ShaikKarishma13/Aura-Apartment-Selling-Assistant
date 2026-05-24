@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from database.db import get_db
-from models.schema import LeadStatus, Interaction
+from models.schema import LeadStatus, Interaction, User
 
 router = APIRouter(
     prefix="/api/dashboard",
@@ -13,9 +13,9 @@ router = APIRouter(
 @router.get("/stats")
 def get_dashboard_stats(db: Session = Depends(get_db)):
 
-    total_leads = db.query(LeadStatus).count()
+    total_leads = db.query(User).count()
 
-    hot_leads = db.query(LeadStatus).filter(
+    hot_leads = db.query(User).join(LeadStatus).filter(
         LeadStatus.status == "Hot"
     ).count()
 
