@@ -1,5 +1,14 @@
+html, body, #root {
+  min-height: 100%;
+  background: linear-gradient(135deg, #4facfe, #6a11cb);
+  overflow-x: hidden;
+}
 :root {
   --sidebar-width: 170px;
+}
+html {
+  background: linear-gradient(135deg, #4facfe, #6a11cb);
+  min-height: 100%;
 }
 
 body {
@@ -7,7 +16,10 @@ body {
   font-family: "Segoe UI", sans-serif;
   background: linear-gradient(135deg, #4facfe, #6a11cb);
   background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 .page-wrap {
   padding-left: 25px;   /* spacing from sidebar */
@@ -224,6 +236,7 @@ input:focus, select:focus, textarea:focus {
   padding: 30px 40px;
   width: calc(100% - var(--sidebar-width));
   max-width: 1200px;
+  min-height: 100vh;
 }
 .main-content h1 {
   color: #ffffff;

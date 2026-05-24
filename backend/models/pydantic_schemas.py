@@ -8,6 +8,13 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     session_id: str = Field(..., description="Unique session identifier for the conversation")
     user_input: str = Field(..., min_length=1, max_length=1000)
+
+    name: str
+    phone: str
+    budget: str
+    location: str
+    status: str
+
     history: Optional[List[ChatMessage]] = []
 
 class ChatResponse(BaseModel):

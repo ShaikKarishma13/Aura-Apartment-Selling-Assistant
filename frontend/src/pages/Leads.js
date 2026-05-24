@@ -127,13 +127,20 @@ function Leads({ leads, setLeads, setActivities }) {
       const saveLeadToBackend = async () => {
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/chat/process-input",
-      {
-        session_id: phone,
-        user_input: `Hi, I am ${name}. Looking for apartment in ${location} with ${budget} budget.`,
-        history: [],
-      }
-    );
+  "http://127.0.0.1:8000/api/chat/process-input",
+  {
+    session_id: phone,
+    user_input: `Hi, I am ${name}. Looking for apartment in ${location} with ${budget} budget.`,
+    
+    name: name,
+    phone: phone,
+    budget: budget,
+    location: location,
+    status: status,
+
+    history: [],
+  }
+);
 
     console.log(response.data);
 
@@ -141,7 +148,7 @@ function Leads({ leads, setLeads, setActivities }) {
       name,
       phone,
       userMessage: `Hi, I am ${name}. Looking for apartment in ${location} with ${budget} budget.`,
-      status: response.data.detected_intent,
+      status: status,
       aiResponse: response.data.response_text,
       sentiment: response.data.sentiment,
       budget: budget || "Low",
@@ -179,14 +186,28 @@ saveLeadToBackend();
   };
 
   // ✅ DELETE
-  const handleDelete = (phone) => {
+const handleDelete = async (phone) => {
+
+  try {
+
+    await axios.delete(
+      `http://127.0.0.1:8000/api/chat/delete-lead/${phone}`
+    );
+
     const leadToDelete = leads.find((l) => l.phone === phone);
 
     setLeads(leads.filter((lead) => lead.phone !== phone));
 
     // 🔥 AI STYLE LOG
     logActivity(`AI removed lead: ${leadToDelete.name}`);
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete lead");
+  }
+};
+
+    
 
   // ✅ FILTER + SEARCH
   const filteredLeads = leads.filter((lead) => {
