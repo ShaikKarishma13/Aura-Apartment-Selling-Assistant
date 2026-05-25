@@ -118,6 +118,41 @@ def get_all_leads(db: Session = Depends(get_db)):
         })
 
     return leads
+@router.put("/update-lead/{phone}")
+def update_lead(
+    phone: str,
+    request: ChatRequest,
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(User.phone == phone).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    # UPDATE USER TABLE
+    user.name = request.name
+    user.phone = request.phone
+    user.budget = request.budget
+    user.location = request.location
+
+    # UPDATE LEAD STATUS TABLE
+    lead_status = (
+        db.query(LeadStatus)
+        .filter(LeadStatus.user_id == user.id)
+        .first()
+    )
+
+    if lead_status:
+        lead_status.status = request.status
+        lead_status.budget = request.budget
+        lead_status.location = request.location
+        lead_status.follow_up_date = request.follow_up_date
+
+    db.commit()
+
+    return {"message": "Lead updated successfully"}
+
 @router.delete("/delete-lead/{phone}")
 def delete_lead(phone: str, db: Session = Depends(get_db)):
 

@@ -11,11 +11,14 @@ class ChatRequest(BaseModel):
 
     name: str
     phone: str
-    budget: str
-    location: str
+
+    budget: str | None = None
+    location: str | None = None
+
     status: str
+
     follow_up_date: str | None = None
-    history: list[ChatMessage]
+    
 
     history: Optional[List[ChatMessage]] = []
 
