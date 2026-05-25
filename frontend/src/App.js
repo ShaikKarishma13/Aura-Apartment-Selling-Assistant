@@ -8,6 +8,7 @@ import FollowUps from "./pages/FollowUps";
 import Settings from "./pages/settings";
 import Analytics from "./pages/Analytics";
 import Calls from "./pages/Calls";
+import AIAssistant from "./pages/AIAssistant";
 
 function App() {
 
@@ -71,6 +72,12 @@ function App() {
         <Route
           path="/analytics"
           element={<Analytics leads={leads} />}
+        />
+        <Route
+        path="/ai-assistant"
+        element={
+          <AIAssistant />
+        }
         />
 
         <Route

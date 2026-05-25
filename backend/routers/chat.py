@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from database.db import get_db
+from services.gemini_service import generate_ai_response
 
 from models.pydantic_schemas import (
     ChatRequest,
@@ -174,35 +175,26 @@ def delete_lead(phone: str, db: Session = Depends(get_db)):
 
 
 
-@router.put("/update-lead/{phone}")
-def update_lead(
-    phone: str,
-    request: ChatRequest,
-    db: Session = Depends(get_db)
-):
 
-    user = db.query(User).filter(User.phone == phone).first()
+@router.post("/ai-chat")
+async def ai_chat(data: dict):
 
-    if not user:
-        raise HTTPException(status_code=404, detail="Lead not found")
+    try:
 
-    # UPDATE USER
-    user.name = request.name
-    user.phone = request.phone
-    user.budget = request.budget
-    user.location = request.location
+        user_message = data.get("message")
+        language = data.get("language")
 
-    # UPDATE LEAD STATUS
-    lead_status = db.query(LeadStatus).filter(
-        LeadStatus.user_id == user.id
-    ).first()
+        ai_response = await generate_ai_response(user_message,language)
 
-    if lead_status:
-        lead_status.status = request.status
-        lead_status.follow_up_date = request.follow_up_date
-        lead_status.budget = request.budget
-        lead_status.location = request.location
+        return {
+            "reply": ai_response
+        }
 
-    db.commit()
+    except Exception as e:
 
-    return {"message": "Lead updated successfully"}
+        print("AI CHAT ERROR:", str(e))
+
+        return {
+            "reply": f"Error: {str(e)}"
+        }
+
