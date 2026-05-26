@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from database.db import get_db
-from services.gemini_service import generate_ai_response
+from services.groq_service import generate_ai_response
 
 from models.pydantic_schemas import (
     ChatRequest,

@@ -9,7 +9,10 @@ html, body, #root {
 html {
   background: linear-gradient(135deg, #4facfe, #6a11cb);
   min-height: 100%;
+  overscroll-behavior: none;
+  
 }
+
 
 body {
   margin: 0;
@@ -20,6 +23,7 @@ body {
   background-size: cover;
   min-height: 100vh;
   overflow-x: hidden;
+ 
 }
 .page-wrap {
   padding-left: 25px;   /* spacing from sidebar */
@@ -237,6 +241,7 @@ input:focus, select:focus, textarea:focus {
   width: calc(100% - var(--sidebar-width));
   max-width: 1200px;
   min-height: 100vh;
+  
 }
 .main-content h1 {
   color: #ffffff;

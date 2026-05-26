@@ -1,3 +1,27 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  background: linear-gradient(
+    135deg,
+    #4f9df7,
+    #6c63ff,
+    #6a11cb
+  );
+   background-attachment: fixed;
+  overflow-x: hidden;
+}
+body {
+  background-attachment: fixed;
+  box-sizing: border-box;
+
+}
+
+
 .aura-input::placeholder {
   color: rgba(255,255,255,0.7);
 }

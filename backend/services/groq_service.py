@@ -12,7 +12,9 @@ client = Groq(
 
 async def generate_ai_response(user_input: str,language: str):
 
+
     completion = client.chat.completions.create(
+        
 
         model="llama-3.1-8b-instant",
 
@@ -35,7 +37,7 @@ async def generate_ai_response(user_input: str,language: str):
 
     "If the selected language is Telugu, "
     "use pure Telugu script only. "
-    "Do NOT mix English words unless absolutely necessary. "
+    "Give short 2-3 lines responses in telugu."
 
     "If the selected language is English, "
     "reply only in English. "
@@ -45,7 +47,7 @@ async def generate_ai_response(user_input: str,language: str):
     "reply briefly in 2-4 lines only. "
 
     "For apartment/property queries,"
-    "reply in detailed helpful format."
+    "reply in 3-4 lines maximum"
 
     "Be friendly and professional"
 
@@ -71,7 +73,7 @@ async def generate_ai_response(user_input: str,language: str):
         ],
 
         temperature=0.7,
-        max_tokens=250
+        max_tokens=800,
     )
 
     return completion.choices[0].message.content

@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import {
+  speakWithElevenLabs,
+  stopElevenLabsAudio
+} from "../services/elevenlabs";
 
 function AIAssistant() {
+  const audioRef = useRef(null);
     const getWelcomeMessage = (lang) => {
 
   if (lang === "Hindi") {
@@ -43,8 +48,11 @@ const [messages, setMessages] = useState([
 
   // 🎤 VOICE INPUT
   const startVoiceInput = () => {
+    stopElevenLabsAudio();
 
     window.speechSynthesis.cancel();
+    
+
 
     const SpeechRecognition =
       window.SpeechRecognition ||
@@ -68,7 +76,10 @@ const [messages, setMessages] = useState([
     setIsListening(true);
 
 
-    recognition.start();
+    // WAIT SLIGHTLY BEFORE STARTING MIC
+setTimeout(() => {
+  recognition.start();
+}, 400);
 
    
 
@@ -105,6 +116,23 @@ const [messages, setMessages] = useState([
       console.log("🎤Voice recognition ended");
     };
   };
+  const clearChat = () => {
+    // STOP ELEVENLABS AUDIO
+    stopElevenLabsAudio();
+
+ // STOP BROWSER VOICE
+    window.speechSynthesis.cancel();
+
+  
+
+  setMessages([
+    {
+      sender: "ai",
+      text: getWelcomeMessage(language),
+    },
+  ]);
+
+};
 
 
 
@@ -135,89 +163,20 @@ const [messages, setMessages] = useState([
         }
       );
 
-      const aiText = response.data.reply;
+      
       setIsTyping(false);
 
       const aiReply = {
         sender: "ai",
-        text: aiText
+        text: response.data.reply,
       };
 
       setMessages((prev) => [...prev, aiReply]);
+      await speakWithElevenLabs(aiReply.text,language);
+      
       // 🔊 AI VOICE OUTPUT
 
-window.speechSynthesis.cancel();
 
-const speech = new SpeechSynthesisUtterance(aiText);
-let cleanText = aiText;
-
-// REMOVE SYMBOLS FOR BETTER VOICE
-cleanText = cleanText
-  .replace(/AURA/g, "ऑरा")
-  .replace(/EVA AI/g, "ईवा ए आई")
-  .replace(/\*/g, "")
-  .replace(/#/g, "");
-
-speech.text = cleanText;
-// 🌍 LANGUAGE BASED AI VOICE
-if (language === "Hindi") {
-     speech.lang = "hi-IN";
-}
-else if (language === "Telugu") {
-    speech.lang = "te-IN";
-}
-else {
-        
-
-speech.lang = "en-US";
-}
-
-speech.volume = 1;
-
-speech.rate = 0.8;
-
-speech.pitch = 1;
-const voices = window.speechSynthesis.getVoices();
-
-console.log(voices);
-
-// 🌍 MULTI LANGUAGE VOICE SELECTION
-
-if (language === "Hindi") {
-
-  speech.voice =
-    voices.find((voice) =>
-      voice.lang.includes("hi")
-    ) || voices[0];
-}
-
-else if (language === "Telugu") {
-
-  speech.voice =
-    voices.find((voice) =>
-      voice.lang.includes("te")
-    ) || voices[0];
-}
-
-else {
-
-  speech.voice =
-    voices.find((voice) =>
-      voice.name.includes("Google UK English Female")
-    ) ||
-
-    voices.find((voice) =>
-      voice.name.includes("Google US English")
-    ) ||
-
-    voices[0];
-}
-// STOP MIC BEFORE AI SPEAKS
-if (recognition) {
-  recognition.stop();
-}
-
-window.speechSynthesis.speak(speech);
 
 
 
@@ -235,6 +194,7 @@ window.speechSynthesis.speak(speech);
           text: "⚠️ Failed to connect with AI Assistant"
         }
       ]);
+      
     }
   };
 
@@ -324,6 +284,42 @@ window.speechSynthesis.speak(speech);
   }}
 >
   {darkMode ? "☀️ " : "🌙 "}
+</button>
+
+<button
+  onClick={clearChat}
+
+  style={{
+    position: "absolute",
+    top: "25px",
+    right: "95px",
+
+    height: "52px",
+
+    padding: "0 18px",
+
+    borderRadius: "14px",
+
+    border: "none",
+
+    background: "white",
+
+    color: "#111",
+
+    fontSize: "15px",
+
+    cursor: "pointer",
+
+    fontWeight: "bold",
+
+    boxShadow: "0 4px 15px rgba(0,0,0,0.18)",
+
+    transition: "all 0.3s ease",
+
+    zIndex: 10,
+  }}
+>
+  🗑 Clear
 </button>
         
         
