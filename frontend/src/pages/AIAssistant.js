@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 function AIAssistant() {
@@ -27,6 +27,17 @@ const [messages, setMessages] = useState([
   
 
   const [input, setInput] = useState("");
+  const [darkMode, setDarkMode] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+  useEffect(() => {
+
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}, [messages, isTyping]);
+  const [isListening, setIsListening] = useState(false);
   let recognition;
   const [language, setLanguage] = useState("English");
 
@@ -54,7 +65,12 @@ const [messages, setMessages] = useState([
 
     recognition.maxAlternatives = 1;
 
+    setIsListening(true);
+
+
     recognition.start();
+
+   
 
     recognition.onstart = () => {
       console.log("🎤 Listening...");
@@ -85,6 +101,7 @@ const [messages, setMessages] = useState([
     };
 
     recognition.onend = () => {
+      setIsListening(false);
       console.log("🎤Voice recognition ended");
     };
   };
@@ -106,6 +123,7 @@ const [messages, setMessages] = useState([
     const userInput = input;
 
     setInput("");
+    setIsTyping(true);
 
     try {
 
@@ -118,6 +136,7 @@ const [messages, setMessages] = useState([
       );
 
       const aiText = response.data.reply;
+      setIsTyping(false);
 
       const aiReply = {
         sender: "ai",
@@ -207,6 +226,7 @@ window.speechSynthesis.speak(speech);
     } catch (error) {
 
       console.error(error);
+      setIsTyping(false);
 
       setMessages((prev) => [
         ...prev,
@@ -225,15 +245,24 @@ window.speechSynthesis.speak(speech);
 
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: "980px",
           margin: "40px auto",
-          background: "rgba(255,255,255,0.08)",
-          borderRadius: "20px",
-          padding: "25px",
-          backdropFilter: "blur(20px)",
-          minHeight: "80vh",
+          background: darkMode
+  ? "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02))"
+  : "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.92))",
+  transition: "0.5s ease",
+          border: "1.5px solid rgba(255,255,255,0.22)",
+          borderRadius: "32px",
+          padding: "32px",
+          backdropFilter: "blur(45px)",
+          WebkitBackdropFilter: "blur(35px)",
+          minHeight: "84vh",
           display: "flex",
           flexDirection: "column",
+          boxShadow: "0 8px 40px rgba(31, 38, 135, 0.45)",
+          transition: "all 0.3s ease",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
 
@@ -241,7 +270,7 @@ window.speechSynthesis.speak(speech);
           style={{
             color: "white",
             marginBottom: "5px",
-            fontsize: "42px",
+            fontsize: "50px",
             fontWeight: "bold",
           }}
         >
@@ -252,12 +281,51 @@ window.speechSynthesis.speak(speech);
             color:"rgba(255,255,255,0,7)",
             marginBottom: "20px",
             fontsize: "16px",
+            color: "white",
+            fontWeight: "bold",
+            
         }}
         >
     
     
         Powered by EVA AI
         </p>
+        <button
+  onClick={() => setDarkMode(!darkMode)}
+
+  style={{
+    position: "absolute",
+    top: "25px",
+    right: "25px",
+
+    width: "52px",
+    height: "52px",
+
+    borderRadius: "14px",
+
+    border: "none",
+
+    background: "white",
+
+    color: "#111",
+
+    fontSize: "22px",
+
+    cursor: "pointer",
+    fontWeight: "bold",
+
+    
+
+    boxShadow: "0 4px 15px rgba(0,0,0,0.18)",
+
+    transition: "all 0.3s ease",
+
+    zIndex: 10,
+  }}
+>
+  {darkMode ? "☀️ " : "🌙 "}
+</button>
+        
         
 
         <div
@@ -283,14 +351,25 @@ window.speechSynthesis.speak(speech);
 
                 background:
                   msg.sender === "user"
-                    ? "#4da6ff"
-                    : "rgba(255,255,255,0.15)",
+                    ? "linear-gradient(135deg, #00c6ff, #0072ff)"
+                    : "rgba(255,255,255,0.12)",
 
                 color: "white",
 
                 padding: "12px 18px",
 
-                borderRadius: "15px",
+                borderRadius: "18px",
+                border:
+  msg.sender === "user"
+    ? "1px solid rgba(255,255,255,0.2)"
+    : "1px solid rgba(255,255,255,0.12)",
+
+backdropFilter: "blur(15px)",
+
+boxShadow:
+  msg.sender === "user"
+    ? "0 4px 20px rgba(0,198,255,0.35)"
+    : "0 4px 18px rgba(255,255,255,0.08)",
 
                 maxWidth: "70%",
               }}
@@ -299,6 +378,34 @@ window.speechSynthesis.speak(speech);
             </div>
 
           ))}
+          {isTyping && (
+
+  <div
+    style={{
+      alignSelf: "flex-start",
+
+      background:
+        "rgba(255,255,255,0.12)",
+
+      color: "white",
+
+      padding: "12px 18px",
+
+      borderRadius: "15px",
+
+      maxWidth: "200px",
+
+      fontStyle: "italic",
+
+      animation: "pulse 1.5s infinite",
+    }}
+  >
+    Aura is typing...
+    
+  </div>
+
+)}
+<div ref={messagesEndRef} />
 
         </div>
 
@@ -323,31 +430,68 @@ window.speechSynthesis.speak(speech);
 }}
 
   style={{
-    padding: "12px",
-    borderRadius: "10px",
-    border: "none",
-    background: "white",
-    fontWeight: "bold",
+    padding: "14px 18px",
+    borderRadius: "18px",
+    border: "2px solid white",
+    background: "#ffffff",
+    color: "#000000",
+    fontWeight: "700",
+    fontSize: "16px",
+    cursor: "pointer",
+    outline: "none",
+    minWidth: "150px",
+    
+    appearance: "auto",
+    WebkitAppearance: "menulist",
+    MozAppearance: "menulist",
+
+    transition: "all 0.3s ease",
   }}
 >
-  <option value="English">🇺🇸 English</option>
-  <option value="Hindi">🇮🇳 Hindi</option>
-  <option value="Telugu">🇮🇳 Telugu</option>
+  <option value="English" style={{ backgroundColor: "white",color: "black",}}>
+  🇺🇸 English
+</option>
+
+<option value="Hindi" style={{backgroundColor: "white", color: "black", }}>
+  🇮🇳 Hindi
+</option>
+
+<option value="Telugu" style={{ backgroundColor: "white",color: "black", }}>
+  🇮🇳 Telugu
+</option>
+  
 </select>
 
           <input
+          className="aura-input"
             type="text"
             placeholder="Ask about apartments..."
+            
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+
+  if (e.key === "Enter") {
+
+    handleSend();
+
+  }
+
+}}
+            
 
             style={{
               flex: 1,
-              padding: "14px",
-              borderRadius: "12px",
-              border: "none",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "2px solid transparent",
               outline: "none",
               fontSize: "16px",
+              background: darkMode ? "white" : "#1e293b",
+              color: darkMode ? "black" : "white",
+              transition: "all 0.3s ease",
+              
+              boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
             }}
           />
 
@@ -360,11 +504,13 @@ window.speechSynthesis.speak(speech);
             style={{
               background: "#00c6ff",
               color: "white",
-              border: "none",
+              border: "1.5px solid rgba(255,255,255,0.25)",
               padding: "14px 24px",
               borderRadius: "12px",
               cursor: "pointer",
               fontWeight: "bold",
+              boxShadow: "0 0 12px rgba(0,198,255,0.5)",
+              
             }}
           >
             Send
@@ -377,14 +523,39 @@ window.speechSynthesis.speak(speech);
             onClick={startVoiceInput}
 
             style={{
-              background: "#ff9800",
-              color: "white",
-              border: "none",
-              padding: "14px 18px",
-              borderRadius: "12px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+  background: isListening
+    ? "#00e676"
+    : "#ff9800",
+
+  color: "white",
+
+  border: isListening
+  ? "1.5px solid #00ffd5"
+  : "1.5px solid rgba(255,255,255,0.25)",
+
+  padding: "14px 18px",
+
+  borderRadius: "14px",
+
+  cursor: "pointer",
+
+  fontWeight: "bold",
+
+  fontSize: "20px",
+
+  boxShadow: isListening
+    ? "0 0 30px #00e676"
+    : "0 0 12px rgba(255,152,0,0.5)",
+
+  transform: isListening
+    ? "scale(1.08)"
+    : "scale(1)",
+
+  transition: "all 0.3s ease",
+}}
+
+            
+              
           >
             🎤
           </button>

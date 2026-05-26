@@ -1,0 +1,43 @@
+.aura-input::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+.aura-input:focus {
+
+  border: 2px solid #00e676 !important;
+
+  box-shadow:
+    0 0 15px #00e676,
+    0 0 30px rgba(0,230,118,0.4);
+
+}
+select option {
+  background: #2b2b4f;
+  color: white;
+}
+select:focus {
+
+  border: 2px solid #00e676 !important;
+
+  box-shadow:
+    0 0 15px #00e676,
+    0 0 30px rgba(0,230,118,0.4);
+
+}
+.aura-input::placeholder {
+  color: #666;
+}
+@keyframes pulse {
+
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
+
+}
