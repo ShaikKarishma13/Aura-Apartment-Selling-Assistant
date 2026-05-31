@@ -367,7 +367,10 @@ boxShadow:
     ? "0 4px 20px rgba(0,198,255,0.35)"
     : "0 4px 18px rgba(255,255,255,0.08)",
 
-                maxWidth: "70%",
+                maxWidth: "85%",
+                minWidth: "400px",
+                
+                whiteSpace: "pre-wrap",
               }}
             >
               {msg.text}
@@ -406,7 +409,7 @@ boxShadow:
         </div>
 
         <div
-          style={{
+          style={{  
             display: "flex",
             gap: "10px",
             marginTop: "20px",

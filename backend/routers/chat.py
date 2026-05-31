@@ -10,7 +10,7 @@ from models.pydantic_schemas import (
     ChatMessage
 )
 
-from models.schema import Interaction, LeadStatus, User
+from models.schema import Interaction, LeadStatus, User, Property,  PropertyLead
 
 from services.llm_service import generate_sales_response
 from services.lead_scoring import classify_lead
@@ -23,168 +23,143 @@ router = APIRouter(
 )
 
 logger = logging.getLogger(__name__)
-
-
-@router.post("/process-input", response_model=ChatResponse)
-async def process_chat_input(
-    request: ChatRequest,
-    db: Session = Depends(get_db)
-):
-    logger.info(f"Processing chat input for session: {request.session_id}")
-
-    # Generate AI response
-    bot_response = await generate_sales_response(
-        user_input=request.user_input,
-        history=request.history
-    )
-
-    # Lead analysis
-    full_history = request.history + [
-        ChatMessage(role="assistant", content=bot_response)
-    ]
-
-    analysis = await classify_lead(full_history)
-
-    # Create user
-    new_user = User(
-        name=request.name,
-        phone=request.phone,
-        budget=request.budget,
-        location=request.location
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    # Save interaction
-    user_interaction = Interaction(
-        user_id=new_user.id,
-        message=request.user_input,
-        response=bot_response,
-        source="text"
-    )
-
-    db.add(user_interaction)
-
-    # Save lead status
-    lead_status = LeadStatus(
-        user_id=new_user.id,
-        name=request.name,
-        phone=request.phone,
-        budget=request.budget,
-        location=request.location,
-        follow_up_date=request.follow_up_date,
-        ai_response=bot_response,
-        status=request.status,
-        score=85 if request.status == "Hot" else 60
-    )
-
-    db.add(lead_status)
-
-    db.commit()
-
-    return ChatResponse(
-        response_text=bot_response,
-        sentiment=analysis.get("reason", "No reason provided"),
-        detected_intent=analysis.get("classification", "Unknown")
-    )
-
-
-@router.get("/all-leads")
-def get_all_leads(db: Session = Depends(get_db)):
-
-    interactions = (
-        db.query(Interaction, User, LeadStatus)
-        .join(User, Interaction.user_id == User.id)
-        .join(LeadStatus, LeadStatus.user_id == User.id)
-        .all()
-    )
-
-    leads = []
-
-    for interaction, user, status in interactions:
-        leads.append({
-            "id": interaction.id,
-            "name": user.name,
-            "phone": user.phone,
-            "status": status.status,
-            "message": interaction.message,
-            "response": interaction.response,
-            "source": interaction.source,
-            "timestamp": str(interaction.timestamp),
-            "budget": user.budget,
-            "location": user.location,
-            "followUpDate": status.follow_up_date
-        })
-
-    return leads
-@router.put("/update-lead/{phone}")
-def update_lead(
-    phone: str,
-    request: ChatRequest,
-    db: Session = Depends(get_db)
-):
-
-    user = db.query(User).filter(User.phone == phone).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Lead not found")
-
-    # UPDATE USER TABLE
-    user.name = request.name
-    user.phone = request.phone
-    user.budget = request.budget
-    user.location = request.location
-
-    # UPDATE LEAD STATUS TABLE
-    lead_status = (
-        db.query(LeadStatus)
-        .filter(LeadStatus.user_id == user.id)
-        .first()
-    )
-
-    if lead_status:
-        lead_status.status = request.status
-        lead_status.budget = request.budget
-        lead_status.location = request.location
-        lead_status.follow_up_date = request.follow_up_date
-
-    db.commit()
-
-    return {"message": "Lead updated successfully"}
-
-@router.delete("/delete-lead/{phone}")
-def delete_lead(phone: str, db: Session = Depends(get_db)):
-
-    user = db.query(User).filter(User.phone == phone).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Lead not found")
-
-    db.query(Interaction).filter(Interaction.user_id == user.id).delete()
-
-    db.query(LeadStatus).filter(LeadStatus.user_id == user.id).delete()
-
-    db.delete(user)
-
-
-    db.commit()
-
-    return {"message": "Lead deleted successfully"}
-
-
+# LEAD CAPTURE MEMORY
+lead_stage = {}
+lead_property = {}
+lead_name = {}
+lead_phone = {}
 
 
 @router.post("/ai-chat")
-async def ai_chat(data: dict):
-
+async def ai_chat(
+    data: dict,
+    db: Session = Depends(get_db)
+):
     try:
 
-        user_message = data.get("message")
-        language = data.get("language")
+        user_message = data.get("message", "")
+        language = data.get("language", "English")
 
-        ai_response = await generate_ai_response(user_message,language)
+        message_lower = user_message.lower()
+        visitor_id = "visitor"
+
+        # -------------------------
+        # WAITING FOR NAME
+        # -------------------------
+
+        if lead_stage.get(visitor_id) == "waiting_name":
+
+            lead_name[visitor_id] = user_message
+
+            lead_stage[visitor_id] = "waiting_phone"
+
+            return {
+                "reply": (
+                    f"Thanks {user_message}! 😊\n\n"
+                    f"Please share your phone number."
+                )
+            }
+
+        # -------------------------
+        # WAITING FOR PHONE
+        # -------------------------
+
+        if lead_stage.get(visitor_id) == "waiting_phone":
+
+            lead_phone[visitor_id] = user_message
+
+            lead_stage[visitor_id] = "waiting_date"
+
+            return {
+                "reply": (
+                    "Thank you! 😊\n\n"
+                    "Please enter a preferred visit date.\n"
+                    "Example: 10 June 2026"
+                )
+            }
+                # -------------------------
+        # WAITING FOR DATE
+        # -------------------------
+
+        if lead_stage.get(visitor_id) == "waiting_date":
+
+            visit_date = user_message
+
+            lead = PropertyLead(
+                name=lead_name.get(visitor_id),
+                phone=lead_phone.get(visitor_id),
+                property_name=lead_property.get(visitor_id),
+                status=f"Site Visit: {visit_date}",
+                visit_date=visit_date
+            )
+
+            db.add(lead)
+            db.commit()
+
+            # Clear memory
+
+            lead_stage.pop(visitor_id, None)
+            lead_name.pop(visitor_id, None)
+            lead_phone.pop(visitor_id, None)
+            lead_property.pop(visitor_id, None)
+
+            return {
+                "reply": (
+                    "✅ Thank you!\n\n"
+                    "Your site visit request has been submitted successfully.\n\n"
+                    "Our sales team will contact you shortly.\n\n"
+                    "Have a great day!😊"
+                )
+            }
+
+        # -------------------------
+        # INTEREST DETECTION
+        # -------------------------
+
+        interest_keywords = [
+            "interested",
+            "book",
+            "site visit",
+            "visit",
+            "schedule",
+            "contact",
+            "call me",
+            
+        ]
+
+        interested = any(
+            keyword in message_lower
+            for keyword in interest_keywords
+        )
+
+        if interested:
+
+            lead_stage[visitor_id] = "waiting_name"
+
+            lead_property[visitor_id] = (
+                user_message
+            .replace("i am interested in", "")
+            .replace("am interested in", "")
+            .replace("interested in", "")
+            .strip()
+            )
+
+            return {
+                "reply": (
+                    "Great! 🏠\n\n"
+                    "I'd be happy to help.\n\n"
+                    "Please share your name."
+                )
+            }
+
+        # -------------------------
+        # GROQ RESPONSE
+        # -------------------------
+
+        ai_response = await generate_ai_response(
+            user_message,
+            language
+        )
 
         return {
             "reply": ai_response
@@ -197,4 +172,3 @@ async def ai_chat(data: dict):
         return {
             "reply": f"Error: {str(e)}"
         }
-

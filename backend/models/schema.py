@@ -55,3 +55,22 @@ class Interaction(Base):
     response = Column(Text)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     source = Column(String) # voice, text, whatsapp
+class PropertyLead(Base):
+    __tablename__ = 'property_leads'
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String)
+
+    phone = Column(String)
+
+    property_name = Column(String)
+
+    status = Column(String, default="Interested")
+    visit_date = Column(String)
+
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )    
