@@ -28,16 +28,24 @@ function Leads({ leads, setLeads, setActivities }) {
       const backendLeads = response.data.map((item) => ({
   name: item.name || "Unknown",
   phone: item.phone || "N/A",
-  status: item.status || "Warm",
-  userMessage: item.message,
-  aiResponse: item.response,
-  sentiment: "Fetched from backend",
-  budget: item.budget || "Medium",
-  location: item.location || "Hyderabad",
-  createdAt: item.timestamp || new Date().toISOString(),
-  followUpDate: item.followUpDate
-  ? new Date(item.followUpDate).toISOString().split("T")[0]
-   : null,
+  status: item.status || "Interested",
+  property_name: item.property_name || "",
+  
+  budget: item.budget || "",
+  location: item.location || "",
+  
+  followUpDate: item.follow_up_date || "",
+  visitDate: item.visit_date || "",
+  notes: item.notes || "",
+  createdAt: item.created_at,
+  userMessage:
+  `Interested in ${item.property_name || "Property"}`,
+  aiResponse:
+  "Lead captured from chatbot",
+  sentiment:
+  "Chatbot Lead"
+
+
 }));
 
       setLeads(backendLeads);
@@ -96,24 +104,18 @@ function Leads({ leads, setLeads, setActivities }) {
       const updateLeadInBackend =  async () => {
         try {
           await axios.put(
-            `http://127.0.0.1:8000/api/chat/update-lead/${editLead.phone}`,
+            `http://127.0.0.1:8000/api/chat/update-property-lead/${editLead.phone}`,
+            
             {
-              session_id: phone,
-              user_input: editLead.userMessage,
-              name,
-              phone,
-              budget,
-              location,
-              status,
+              
+              budget:budget,
+              location:location,
+              
               follow_up_date: followUpDate,
-              history: [],
+              notes: ""
             }
           );
           const updateLeads = leads.map((l) =>
-
-
-
-
 
         l.phone === editLead.phone
           ? {
@@ -315,8 +317,33 @@ const handleDelete = async (phone) => {
     <option value="Bangalore">Bangalore</option>
     <option value="Mumbai">Mumbai</option>
   </select>
-  
-  
+  <div className="filters-row">
+
+  <select value={filter}>
+    ...
+  </select>
+
+  <select value={budgetFilter}>
+    ...
+  </select>
+
+  <select value={locationFilter}>
+    ...
+  </select>
+
+  <button
+    onClick={() =>
+      window.open(
+        "http://127.0.0.1:8000/api/chat/export-leads",
+        "_blank"
+      )
+    }
+  >
+    📊 Export Leads
+  </button>
+
+</div>
+ 
 
 </div>
 
@@ -420,7 +447,7 @@ const handleDelete = async (phone) => {
 
       <hr />
 
-      <h3>AI Conversation 💬</h3>
+      <h3>Property Details 🏠</h3>
 
       <div
   style={{
@@ -437,21 +464,20 @@ const handleDelete = async (phone) => {
 >
 
         <p>
-  <b>User:</b> {selectedLead.userMessage}
+  <b>property:</b> {selectedLead.property_name || "Not Available"}
 </p>
         <p>
-          <b>AI:</b> {selectedLead.aiResponse || "No AI response"}
+          <b>Budget:</b> {selectedLead.budget || "No Set"}
         </p>
+        <p><b>Location:</b> {selectedLead.location || "Not Set"}</p>
+        <p><b>Status:</b> {selectedLead.status || "Not Set"}</p>
+        <p><b>Visit Date:</b> {selectedLead.visit_date || "Not Scheduled"}</p>
+        <p><b>Follow Up:</b> {selectedLead.follow_up_date || "Not Scheduled"}</p>
+
 
       </div>
 
-      <hr />
-
-      <h3>AI Analysis 🧠</h3>
-
-      <p>
-        {selectedLead.sentiment || "No analysis"}
-      </p>
+      
 
     </div>
 

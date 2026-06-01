@@ -7,10 +7,10 @@ import ChartSection from "../components/ChartSection";
 
 function Dashboard({ leads = [], activities = [], calls = [] }) {
  const [stats, setStats] = useState({
-  total_leads: 0,
-  hot_leads: 0,
-  calls_today: 0,
-  conversion_rate: 0,
+  totalChats: 0,
+  totalLeads: 0,
+  siteVisits: 0,
+  interestedCustomers: 0,
 });
 
 useEffect(() => {
@@ -124,23 +124,23 @@ useEffect(() => {
           {/* ================= CARDS ================= */}
           <div className="cards">
             <div className="card">
-              <h3>Total Leads</h3>
-              <p>{stats.total_leads}</p>
+              <h3>Total Chats 💬</h3>
+              <p>{stats.totalChats}</p>
             </div>
 
             <div className="card">
-              <h3>Calls Today 📞</h3>
-              <p>{stats.calls_today}</p>
+              <h3>Total Leads 🏠</h3>
+              <p>{stats.totalLeads}</p>
             </div>
 
             <div className="card">
-              <h3>Hot Leads 🔥</h3>
-              <p>{stats.hot_leads}</p>
+              <h3>Interested Customers 🔥</h3>
+              <p>{stats.interestedCustomers}</p>
             </div>
 
             <div className="card">
-              <h3>Conversion Rate %</h3>
-              <p>{stats.conversion_rate}%</p>
+              <h3>Booked site Visits 📅</h3>
+              <p>{stats.siteVisits}</p>
             </div>
           </div>
 

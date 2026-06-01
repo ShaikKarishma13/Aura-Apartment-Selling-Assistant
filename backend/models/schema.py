@@ -66,11 +66,36 @@ class PropertyLead(Base):
 
     property_name = Column(String)
 
+    budget = Column(String, nullable=True)
+
+    location = Column(String, nullable=True)
+
+    follow_up_date = Column(String, nullable=True)
+
+    notes = Column(String, nullable=True)
+
     status = Column(String, default="Interested")
+    
     visit_date = Column(String)
 
 
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
-    )    
+    )
+class ChatHistory(Base):
+    __tablename__ = 'chat_history'
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    visitor_id = Column(String)
+
+    role = Column(String)
+
+    message = Column(Text)
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+

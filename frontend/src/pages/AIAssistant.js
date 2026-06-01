@@ -36,17 +36,74 @@ const [messages, setMessages] = useState([
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   useEffect(() => {
+    let visitorId = localStorage.getItem("visitor_id");
+    if (!visitorId) {
+      visitorId = 
+      "visitor_" +
+      Math.random().toString(36).substring(2, 10);
+      localStorage.setItem(
+        "visitor_id",
+        visitorId
+      );
+    }
+
 
   messagesEndRef.current?.scrollIntoView({
     behavior: "smooth"
   });
 
 }, [messages, isTyping]);
+useEffect(() => {
+
+  const loadHistory = async () => {
+
+    try {
+
+      const visitorId =
+        localStorage.getItem("visitor_id");
+
+      if (!visitorId) return;
+
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/chat/chat-history/${visitorId}`
+      );
+
+      const formattedMessages =
+        response.data.map(chat => ({
+          sender:
+            chat.role === "user"
+              ? "user"
+              : "bot",
+          text: chat.message
+        }));
+
+      if (formattedMessages.length > 0) {
+        setMessages(formattedMessages);
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth"
+            });
+          }, 200);
+        
+      }
+
+    } catch (error) {
+      console.error(
+        "History load error:",
+        error
+      );
+    }
+  };
+
+  loadHistory();
+
+}, []);
   const [isListening, setIsListening] = useState(false);
   let recognition;
   const [language, setLanguage] = useState("English");
 
   // 🎤 VOICE INPUT
+
   const startVoiceInput = () => {
     stopElevenLabsAudio();
 
@@ -158,8 +215,9 @@ setTimeout(() => {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/chat/ai-chat",
         {
-          message: userInput,
-          language: language
+          message: input,
+          language: language,
+          visitor_id: localStorage.getItem("visitor_id")
         }
       );
 
@@ -368,7 +426,7 @@ boxShadow:
     : "0 4px 18px rgba(255,255,255,0.08)",
 
                 maxWidth: "85%",
-                minWidth: "400px",
+                
                 
                 whiteSpace: "pre-wrap",
               }}

@@ -2,3 +2,6 @@ node_modules/
 __pycache__/
 .env
 venv/
+
+leads.xlsx
+backend/leads.xlsx

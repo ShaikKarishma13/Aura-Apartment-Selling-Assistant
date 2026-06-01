@@ -9,6 +9,7 @@ import models.schema
 from routers import chat
 from routers import dashboard
 
+
 import logging
 
 
@@ -34,6 +35,7 @@ app.add_middleware(
 # Mount Routers
 app.include_router(chat.router)
 app.include_router(dashboard.router)
+
 
 @app.get("/")
 def health_check():

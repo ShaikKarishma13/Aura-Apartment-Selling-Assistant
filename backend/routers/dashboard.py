@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from database.db import get_db
-from models.schema import LeadStatus, Interaction, User
+from models.schema import LeadStatus, Interaction, User, ChatHistory, PropertyLead
 
 router = APIRouter(
     prefix="/api/dashboard",
@@ -11,24 +11,33 @@ router = APIRouter(
 )
 
 @router.get("/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(
+    db: Session = Depends(get_db)
+):
 
-    total_leads = db.query(User).count()
+    total_chats = db.query(ChatHistory).count()
 
-    hot_leads = db.query(User).join(LeadStatus).filter(
-        LeadStatus.status == "Hot"
-    ).count()
+    total_leads = db.query(PropertyLead).count()
 
-    total_calls = db.query(Interaction).count()
+    site_visits = (
+        db.query(PropertyLead)
+        .filter(PropertyLead.visit_date.isnot(None)
+        )
+        .count()
+    )
 
-    conversion_rate = 0
+    interested_customers = (
+        db.query(PropertyLead)
+        .filter(
+            PropertyLead.status.like("%Interested%")
+        )
+        .count()
 
-    if total_leads > 0:
-        conversion_rate = round((hot_leads / total_leads) * 100)
+    )
 
     return {
-        "total_leads": total_leads,
-        "hot_leads": hot_leads,
-        "calls_today": total_calls,
-        "conversion_rate": conversion_rate
+        "totalChats": total_chats,
+        "totalLeads": total_leads,
+        "siteVisits": site_visits,
+        "interestedCustomers": interested_customers
     }
