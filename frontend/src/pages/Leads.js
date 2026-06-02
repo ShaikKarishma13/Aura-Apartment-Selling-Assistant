@@ -107,6 +107,9 @@ function Leads({ leads, setLeads, setActivities }) {
             `http://127.0.0.1:8000/api/chat/update-property-lead/${editLead.phone}`,
             
             {
+              name: name,
+              phone: phone,
+              status: status,
               
               budget:budget,
               location:location,
@@ -218,6 +221,24 @@ saveLeadToBackend();
     setBudget("");
     setLocation("");
   };
+  // 📞 CALL
+const handleCall = async (phone) => {
+
+  try {
+
+    await axios.post(
+      `http://127.0.0.1:8000/api/call/make-call?phone=${phone}`
+    );
+
+    alert(`📞 Calling ${phone}`);
+
+  } catch (error) {
+
+    console.error(error);
+    alert("Call failed");
+
+  }
+};
 
   // ✅ DELETE
 const handleDelete = async (phone) => {
@@ -317,19 +338,7 @@ const handleDelete = async (phone) => {
     <option value="Bangalore">Bangalore</option>
     <option value="Mumbai">Mumbai</option>
   </select>
-  <div className="filters-row">
-
-  <select value={filter}>
-    ...
-  </select>
-
-  <select value={budgetFilter}>
-    ...
-  </select>
-
-  <select value={locationFilter}>
-    ...
-  </select>
+  
 
   <button
     onClick={() =>
@@ -342,7 +351,7 @@ const handleDelete = async (phone) => {
     📊 Export Leads
   </button>
 
-</div>
+
  
 
 </div>
@@ -420,6 +429,7 @@ const handleDelete = async (phone) => {
               </span>
 
               <div>
+                <button onClick={(e) => { e.stopPropagation(); handleCall(lead.phone); }}>📞</button>
                 <button onClick={(e) => { e.stopPropagation(); startEdit(lead); }}>✏️</button>
                 <button onClick={(e) => { e.stopPropagation(); handleDelete(lead.phone); }}>❌</button>
               </div>

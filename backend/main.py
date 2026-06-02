@@ -8,6 +8,7 @@ import models.schema
 
 from routers import chat
 from routers import dashboard
+from routers import call
 
 
 import logging
@@ -35,6 +36,7 @@ app.add_middleware(
 # Mount Routers
 app.include_router(chat.router)
 app.include_router(dashboard.router)
+app.include_router(call.router)
 
 
 @app.get("/")

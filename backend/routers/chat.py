@@ -324,6 +324,12 @@ def update_property_lead(
     )
 
     lead.notes = data.get("notes")
+    
+    lead.name = data.get("name")
+
+    lead.phone = data.get("phone")
+
+    lead.status = data.get("status")
 
     db.commit()
 
