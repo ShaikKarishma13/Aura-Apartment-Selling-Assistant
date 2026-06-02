@@ -327,11 +327,7 @@ const handleDelete = async (phone) => {
     <option value="Medium">Medium</option>
     <option value="High">High</option>
   </select>
-  
-  
-
-
-  
+ 
   <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
     <option value="All">All Location</option>
     <option value="Hyderabad">Hyderabad</option>
@@ -341,6 +337,7 @@ const handleDelete = async (phone) => {
   
 
   <button
+    className="export-btn"
     onClick={() =>
       window.open(
         "http://127.0.0.1:8000/api/chat/export-leads",

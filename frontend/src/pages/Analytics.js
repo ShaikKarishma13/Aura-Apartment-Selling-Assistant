@@ -60,7 +60,7 @@ function Analytics({ leads = [] }) {
               <h3>High-Intent Leads %</h3>
               <h2>{highIntentRate}%</h2>
 
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width={340} height={340}>
                 <PieChart>
                   <Pie data={data} dataKey="value">
                     {data.map((entry, i) => (

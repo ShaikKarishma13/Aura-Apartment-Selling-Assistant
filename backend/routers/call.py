@@ -28,7 +28,42 @@ def make_call(phone: str):
     call = client.calls.create(
         to=phone,
         from_=TWILIO_NUMBER,
-        twiml="<Response><Say>Hello from Apartment AI Agent.</Say></Response>"
+        
+        twiml="""
+<Response>
+
+<Say voice="alice">
+Hello. I am Aura, the Apartment Sales Assistant speaking.
+</Say>
+
+<Pause length="1"/>
+
+<Say voice="alice">
+Thank you for showing interest in our apartment listings.
+</Say>
+
+<Pause length="1"/>
+
+<Gather numDigits="1" timeout="10">
+
+<Say voice="alice">
+To schedule a site visit, press 1.
+
+To receive a callback later, press 2.
+
+If you are no longer interested, press 3.
+</Say>
+
+</Gather>
+
+<Say voice="alice">
+Thank you for your response.
+Our sales team will contact you shortly.
+Goodbye.
+</Say>
+
+</Response>
+"""
     )
 
     return {

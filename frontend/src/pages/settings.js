@@ -3,23 +3,30 @@ import Sidebar from "../layout/Sidebar";
 import Topbar from "../layout/Topbar";
 
 function Settings() {
-  // AI Config
-  const [prompt, setPrompt] = useState("");
-  const [tone, setTone] = useState("Friendly");
 
-  // Call settings
+  // ================= NOTIFICATIONS =================
+
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [callAlerts, setCallAlerts] = useState(true);
+  const [followUpReminders, setFollowUpReminders] = useState(true);
+  const [hotLeadAlerts, setHotLeadAlerts] = useState(true);
+
+  // ================= CALL SETTINGS =================
+
   const [callTime, setCallTime] = useState("09:00");
   const [retries, setRetries] = useState(3);
 
   const handleSave = () => {
     console.log({
-      prompt,
-      tone,
+      emailNotifications,
+      callAlerts,
+      followUpReminders,
+      hotLeadAlerts,
       callTime,
-      retries
+      retries,
     });
 
-    alert("Settings saved (frontend only)");
+    alert("Settings saved successfully");
   };
 
   return (
@@ -29,58 +36,123 @@ function Settings() {
       <div className="main-content">
         <Topbar />
 
-        {/* ✅ WRAPPER ADDED */}
         <div className="page-wrap">
 
-          <h1 className="page-title">Settings ⚙️</h1>
+          <h1 className="page-title">
+            Settings ⚙️
+          </h1>
 
-          {/* ================= AI CONFIG ================= */}
+          {/* ================= NOTIFICATION SETTINGS ================= */}
+
           <div className="settings-card">
-            <h2>AI Configuration 🤖</h2>
+            <h2>Notification Settings 🔔</h2>
 
-            <textarea
-              placeholder="Enter AI prompt..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
+            <div className="notification-row">
+              <span className="notification-label">
+                Email Notifications
+              </span>
 
-            <select value={tone} onChange={(e) => setTone(e.target.value)}>
-              <option>Friendly</option>
-              <option>Professional</option>
-              <option>Aggressive</option>
-            </select>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={emailNotifications}
+                  onChange={() =>
+                    setEmailNotifications(!emailNotifications)
+                  }
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="notification-row">
+              <span className="notification-label">
+              Call Alerts
+              </span>
+
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={callAlerts}
+                  onChange={() =>
+                    setCallAlerts(!callAlerts)
+                  }
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="notification-row">
+              <span className="notification-label">
+                Follow-up Reminders
+              </span>
+
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={followUpReminders}
+                  onChange={() =>
+                    setFollowUpReminders(!followUpReminders)
+                  }
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+
+            <div className="notification-row">
+              <span className="notification-label">
+                Hot Lead Alerts
+              </span>
+
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={hotLeadAlerts}
+                  onChange={() =>
+                    setHotLeadAlerts(!hotLeadAlerts)
+                  }
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
           </div>
 
           {/* ================= CALL SETTINGS ================= */}
+
           <div className="settings-card">
             <h2>Call Settings 📞</h2>
 
+            <div className="settings-field"></div>
+
             <label>Call Start Time</label>
+
             <input
+              className="settings-input"
               type="time"
               value={callTime}
-              onChange={(e) => setCallTime(e.target.value)}
+              onChange={(e) =>
+                setCallTime(e.target.value)
+              }
             />
+            <div className="settings-field"></div>
 
             <label>Retry Attempts</label>
+
             <input
+              className="settings-input"
               type="number"
               value={retries}
-              onChange={(e) => setRetries(e.target.value)}
+              onChange={(e) =>
+                setRetries(e.target.value)
+              }
             />
           </div>
 
-          {/* ================= DATA ================= */}
-          <div className="settings-card">
-            <h2>Data Management 📂</h2>
+          {/* ================= SAVE BUTTON ================= */}
 
-            <input type="file" />
-
-            <button className="export-btn">Export Leads</button>
-          </div>
-
-          {/* SAVE BUTTON */}
-          <button className="save-btn" onClick={handleSave}>
+          <button
+            className="save-btn"
+            onClick={handleSave}
+          >
             Save Settings
           </button>
 
