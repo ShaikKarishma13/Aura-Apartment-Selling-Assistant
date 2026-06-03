@@ -24,7 +24,7 @@ function PieChartSection({ leads, setFilter}) {
           <Pie
             data={data}
             dataKey="value"
-            outerRadius={60}
+            outerRadius={100}
             label
             onClick={(entry) => setFilter(entry.name)}
           >

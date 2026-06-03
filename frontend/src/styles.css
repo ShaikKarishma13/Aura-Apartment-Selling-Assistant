@@ -467,6 +467,7 @@ h1 {
   box-shadow: 0 8px 30px rgba(0,0,0,0.2);
   color: white;
   width: 100%;
+  min-height: 400px;
 }
 
 /* ================= LEADS PAGE ================= */
@@ -692,8 +693,10 @@ h1 {
 }
 
 .leads-right {
-  flex: 1;
-  min-width: 400px;
+  flex-direction: column;
+  width: 420px;
+  display: flex;
+  gap: 24px;
 }
 
 /* Status */
@@ -1130,24 +1133,32 @@ transform: translateY(-4px);
   color: white;
   max-width: 700px;
 }
-/* CALLS PAGE */
+/==========* CALLS PAGE *==============/
 
 .calls-container {
   display: flex;
-  gap: 20px;
+  align-items: flex-start;
+  gap: 40px;
   margin-top: 20px;
 }
 /* ===== LEFT PANEL ===== */
 .calls-left {
+  flex: 0 0 32%;
   width: 30%;
-  flex: 1;
+
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
+
   padding: 15px;
   border-radius: 16px;
+
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
   color: white;
   transition: all 0.3s ease;
+  
+  
+  
 }
 .calls-left:hover{
   transform: translateY(-4px);
@@ -1158,15 +1169,21 @@ transform: translateY(-4px);
       
 /* ===== RIGHT PANEL ===== */
 .calls-right {
-  width: 70%;
-  flex: 2;
+  flex: 1;
+  width: 40%;
+
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+
   padding: 15px;
   border-radius: 16px;
+
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
   color: white;
+  transition: all 0.3s ease;
+  
+  
 }
 .calls-right:hover{
 transform: translateY(-4px);
@@ -1174,18 +1191,7 @@ transform: translateY(-4px);
     0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 20px rgba(0, 245, 255, 0.15); /* 🔥 glow */
 }
-.call-card {
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-}
-.call-card.active {
-  border: 2px solid #00f5ff;
-}
+
 
 .call-item {
   display: flex;
@@ -1249,6 +1255,46 @@ transform: translateY(-4px);
 
 .call-actions button:nth-child(3):hover {
   background: #3e8e41;
+}
+
+/* ================= CALL HISTORY ================= */
+
+.call-history-card {
+  width: 70%;
+  margin-top: 20px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  
+ 
+}
+
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 12px;
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.08);
+
+  
+}
+
+.history-item button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+
+  background: rgba(255,255,255,0.15);
+  color: white;
 }
 
 .logout {
