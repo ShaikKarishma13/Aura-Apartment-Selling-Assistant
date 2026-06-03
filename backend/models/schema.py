@@ -99,3 +99,24 @@ class ChatHistory(Base):
         server_default=func.now()
     )
 
+class CallHistory(Base):
+    __tablename__ = "call_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String)
+
+    phone = Column(String)
+
+    duration = Column(Integer)
+
+    sentiment = Column(String)
+
+    transcript = Column(Text)
+
+    status = Column(String)
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )

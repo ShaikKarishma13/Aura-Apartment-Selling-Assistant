@@ -1,6 +1,15 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
+
+class CallHistoryCreate(BaseModel):
+    name: str
+    phone: str
+    duration: int
+    sentiment: str
+    transcript: str
+    status: str
+
 class ChatMessage(BaseModel):
     role: str = Field(..., description="'user' or 'assistant'")
     content: str

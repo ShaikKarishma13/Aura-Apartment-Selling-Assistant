@@ -2,6 +2,9 @@ from fastapi import APIRouter
 from twilio.rest import Client
 from dotenv import load_dotenv
 import os
+from database.db import SessionLocal
+from models.schema import CallHistory
+from models.pydantic_schemas import CallHistoryCreate
 
 load_dotenv()
 
@@ -31,6 +34,10 @@ def make_call(phone: str):
         
         twiml="""
 <Response>
+<Record
+maxLength="120"
+playBeep="true"
+/>
 
 <Say voice="alice">
 Hello. I am Aura, the Apartment Sales Assistant speaking.
@@ -70,3 +77,38 @@ Goodbye.
         "message": "Call initiated",
         "call_sid": call.sid
     }
+
+@router.post("/save-history")
+def save_call_history(data: dict):
+
+    print("RECEIVED DATA:", data)
+
+    db = SessionLocal()
+
+    call = CallHistory(
+        name=data.get("name"),
+        phone=data.get("phone"),
+        duration=data.get("duration"),
+        sentiment=data.get("sentiment"),
+        transcript=data.get("transcript"),
+        status=data.get("status")
+    )
+
+    db.add(call)
+    db.commit()
+    db.refresh(call)
+
+    return {
+        "message": "Call history saved",
+        "id": call.id
+    }
+@router.get("/history")
+def get_call_history():
+
+    db = SessionLocal()
+
+    calls = db.query(CallHistory)\
+              .order_by(CallHistory.id.desc())\
+              .all()
+
+    return calls
