@@ -169,3 +169,17 @@ def save_call_history(data: dict):
     finally:
 
         db.close()
+@router.get("/history")
+def get_call_history():
+
+    db = SessionLocal()
+
+    calls = (
+        db.query(CallHistory)
+        .order_by(CallHistory.id.desc())
+        .all()
+    )
+
+    db.close()
+
+    return calls
