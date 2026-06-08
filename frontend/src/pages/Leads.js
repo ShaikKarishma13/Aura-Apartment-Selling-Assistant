@@ -222,15 +222,26 @@ saveLeadToBackend();
     setLocation("");
   };
   // 📞 CALL
-const handleCall = async (phone) => {
+const handleCall = async (lead) => {
 
   try {
 
     await axios.post(
-      `http://127.0.0.1:8000/api/call/make-call?phone=${phone}`
+      `http://127.0.0.1:8000/api/call/make-call?phone=${lead.phone}`
     );
 
-    alert(`📞 Calling ${phone}`);
+    await axios.post(
+      "http://127.0.0.1:8000/api/call/save-history",
+      {
+        name: lead.name,
+        phone: lead.phone,
+        duration: 120,
+        status: "Completed",
+        recording_url: "http://127.0.0.1:8000/recordings/call1.mp3"
+      }
+    );
+
+    alert(`📞 Calling ${lead.name}`);
 
   } catch (error) {
 
@@ -426,7 +437,7 @@ const handleDelete = async (phone) => {
               </span>
 
               <div>
-                <button onClick={(e) => { e.stopPropagation(); handleCall(lead.phone); }}>📞</button>
+                <button onClick={(e) => { e.stopPropagation(); handleCall(lead); }}>📞</button>
                 <button onClick={(e) => { e.stopPropagation(); startEdit(lead); }}>✏️</button>
                 <button onClick={(e) => { e.stopPropagation(); handleDelete(lead.phone); }}>❌</button>
               </div>

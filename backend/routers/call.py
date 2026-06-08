@@ -24,6 +24,7 @@ router = APIRouter(
 ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+DEFAULT_RECORDING_URL = "http://127.0.0.1:8000/recordings/call1.mp3"
 
 
 @router.post("/make-call")
@@ -107,13 +108,27 @@ def save_call_history(data: dict):
 
     audio_path = r"C:\Aura-Clean\recordings\call1.mp3"
 
-    transcript = transcribe_audio(audio_path)
+    try:
+        transcript = transcribe_audio(audio_path)
+    except Exception as e:
+        print("TRANSCRIPTION ERROR:", str(e))
+        transcript = "Transcript unavailable. Please check the recording file."
 
     print("TRANSCRIPT:", transcript)
 
-    analysis = asyncio.run(
-        analyze_lead(transcript)
-    )
+    try:
+        analysis = asyncio.run(
+            analyze_lead(transcript)
+        )
+    except Exception as e:
+        print("ANALYSIS ERROR:", str(e))
+        analysis = {
+            "property_type": "",
+            "budget": "",
+            "location": "",
+            "intent": "",
+            "sentiment": data.get("sentiment", "")
+        }
 
     db = SessionLocal()
 
@@ -124,7 +139,7 @@ def save_call_history(data: dict):
 
         transcript=transcript,
 
-        recording_url=data.get("recording_url"),
+        recording_url=data.get("recording_url") or DEFAULT_RECORDING_URL,
 
         property_type=analysis.get("property_type"),
         budget=analysis.get("budget"),
@@ -179,6 +194,10 @@ def get_call_history():
         .order_by(CallHistory.id.desc())
         .all()
     )
+
+    for call in calls:
+        if not call.recording_url:
+            call.recording_url = DEFAULT_RECORDING_URL
 
     db.close()
 

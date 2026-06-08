@@ -144,9 +144,22 @@ function Calls() {
 
               <h2>🎧 Recording</h2>
 
-              <p>
-                Recording playback coming soon...
-              </p>
+              {selectedCallData?.recording_url ? (
+                <audio
+                  controls
+                  src={selectedCallData.recording_url}
+                  style={{
+                    width: "100%",
+                    marginTop: "10px"
+                  }}
+                >
+                  Your browser does not support audio playback.
+                </audio>
+              ) : (
+                <p>
+                  No recording available
+                </p>
+              )}
 
             </div>
 
