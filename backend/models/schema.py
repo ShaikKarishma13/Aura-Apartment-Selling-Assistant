@@ -114,6 +114,12 @@ class CallHistory(Base):
 
     transcript = Column(Text)
 
+    recording_url = Column(Text, nullable=True)
+    property_type = Column(String, nullable=True)
+    budget = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    intent = Column(String, nullable=True)
+
     status = Column(String)
 
     created_at = Column(

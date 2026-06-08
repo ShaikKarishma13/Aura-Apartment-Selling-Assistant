@@ -1,3 +1,11 @@
+import asyncio
+
+from services.lead_analysis_service import (
+    analyze_lead
+)
+from services.transcription_service import (
+    transcribe_audio
+)
 from fastapi import APIRouter
 from twilio.rest import Client
 from dotenv import load_dotenv
@@ -35,9 +43,14 @@ def make_call(phone: str):
         twiml="""
 <Response>
 <Record
-maxLength="120"
-playBeep="true"
+    maxLength="120"
+    playBeep="false"
 />
+
+
+<Say voice="alice">
+Hello. I am Aura, the Apartment Sales Assistant speaking.
+</Say>
 
 <Say voice="alice">
 Hello. I am Aura, the Apartment Sales Assistant speaking.
@@ -51,14 +64,22 @@ Thank you for showing interest in our apartment listings.
 
 <Pause length="1"/>
 
-<Gather numDigits="1" timeout="10">
+<Gather
+    input="speech"
+    speechTimeout="auto"
+    timeout="30"
+>
 
 <Say voice="alice">
-To schedule a site visit, press 1.
+Please tell us about your property requirements.
 
-To receive a callback later, press 2.
+For example, you can tell us the apartment type,
+budget, 
+preferred location,
+and whether you are interested in a site visit. 
 
-If you are no longer interested, press 3.
+
+After speaking, please wait a few seconds.
 </Say>
 
 </Gather>
@@ -69,9 +90,10 @@ Our sales team will contact you shortly.
 Goodbye.
 </Say>
 
-</Response>
+</Response> 
 """
     )
+    print("CALL SID:", call.sid)
 
     return {
         "message": "Call initiated",
@@ -83,32 +105,67 @@ def save_call_history(data: dict):
 
     print("RECEIVED DATA:", data)
 
+    audio_path = r"C:\Aura-Clean\recordings\call1.mp3"
+
+    transcript = transcribe_audio(audio_path)
+
+    print("TRANSCRIPT:", transcript)
+
+    analysis = asyncio.run(
+        analyze_lead(transcript)
+    )
+
     db = SessionLocal()
 
     call = CallHistory(
         name=data.get("name"),
         phone=data.get("phone"),
         duration=data.get("duration"),
-        sentiment=data.get("sentiment"),
-        transcript=data.get("transcript"),
+
+        transcript=transcript,
+
+        recording_url=data.get("recording_url"),
+
+        property_type=analysis.get("property_type"),
+        budget=analysis.get("budget"),
+        location=analysis.get("location"),
+        intent=analysis.get("intent"),
+
+        sentiment=analysis.get("sentiment"),
+
         status=data.get("status")
     )
 
-    db.add(call)
-    db.commit()
-    db.refresh(call)
+    try:
 
-    return {
-        "message": "Call history saved",
-        "id": call.id
-    }
-@router.get("/history")
-def get_call_history():
+        db.add(call)
 
-    db = SessionLocal()
+        print("BEFORE COMMIT")
 
-    calls = db.query(CallHistory)\
-              .order_by(CallHistory.id.desc())\
-              .all()
+        db.commit()
 
-    return calls
+        print("AFTER COMMIT")
+
+        db.refresh(call)
+
+        print("SAVED ID:", call.id)
+
+        return {
+            "message": "Call history saved",
+            "id": call.id,
+            "analysis": analysis
+        }
+
+    except Exception as e:
+
+        print("DATABASE ERROR:", str(e))
+
+        db.rollback()
+
+        return {
+            "error": str(e)
+        }
+
+    finally:
+
+        db.close()
