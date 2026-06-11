@@ -20,7 +20,7 @@ def transcribe_audio(audio_path: str) -> str:
         return "Transcript unavailable. Please install faster-whisper for full transcription support."
 
     try:
-        segments, info = model.transcribe(audio_path, language="en")
+        segments, info = model.transcribe(audio_path, language="en", vad_filter=True)
         transcript = ""
         for segment in segments:
             transcript += segment.text + " "

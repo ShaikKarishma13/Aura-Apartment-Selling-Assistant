@@ -89,7 +89,7 @@ async def text_to_mulaw_base64(text: str) -> str | None:
                 speech_config=types.SpeechConfig(
                     voice_config=types.VoiceConfig(
                         prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                            voice_name="Aoede"
+                            voice_name="Kore"
                         )
                     )
                 )

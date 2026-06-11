@@ -395,22 +395,25 @@ async def twilio_media_stream(websocket: WebSocket):
                         logger.error(f"Failed to play initial greeting: {e}")
 
             elif event == "media":
+                # Temporary debug: log first few media events to a file
+                try:
+                    import os
+                    debug_file = r"C:\Aura-Clean\media_events.txt"
+                    # Limit file size / entries
+                    if not os.path.exists(debug_file) or os.path.getsize(debug_file) < 20000:
+                        with open(debug_file, "a") as f:
+                            f.write(f"EVENT: {json.dumps(msg)[:1000]}\n")
+                except Exception as log_err:
+                    logger.error(f"Debug logging error: {log_err}")
+
                 if audio_buffer and call_sid:
-                    payload = msg.get("media", {}).get("payload", "")
-                    if payload:
+                    media_data = msg.get("media", {})
+                    track = media_data.get("track")
+                    payload = media_data.get("payload", "")
+                    # Process ONLY the inbound track (caller's voice)
+                    # Ignore the outbound track to prevent assistant self-transcription loop
+                    if track == "inbound" and payload:
                         await audio_buffer.add_audio(payload)
-                        
-                        # Forward the audio packet to the frontend WS for live browser playback
-                        from services.media_stream_service import get_stream
-                        stream = await get_stream(call_sid)
-                        if stream and stream.get("frontend_ws"):
-                            try:
-                                await stream["frontend_ws"].send_json({
-                                    "type": "audio",
-                                    "payload": payload
-                                })
-                            except Exception:
-                                pass
 
             elif event == "stop":
                 logger.info(f"Media stream stopped for call SID: {call_sid}")
