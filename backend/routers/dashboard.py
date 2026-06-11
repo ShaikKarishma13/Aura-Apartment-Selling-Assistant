@@ -21,23 +21,19 @@ def get_dashboard_stats(
 
     site_visits = (
         db.query(PropertyLead)
-        .filter(PropertyLead.visit_date.isnot(None)
-        )
+        .filter(PropertyLead.visit_date.isnot(None))
         .count()
     )
 
-    interested_customers = (
+    high_intent = (
         db.query(PropertyLead)
-        .filter(
-            PropertyLead.status.like("%Interested%")
-        )
+        .filter(PropertyLead.status.in_(["Hot", "Warm"]))
         .count()
-
     )
 
     return {
         "totalChats": total_chats,
         "totalLeads": total_leads,
         "siteVisits": site_visits,
-        "interestedCustomers": interested_customers
+        "highIntentLeads": high_intent
     }

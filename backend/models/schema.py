@@ -121,6 +121,12 @@ class CallHistory(Base):
     intent = Column(String, nullable=True)
 
     status = Column(String)
+    
+    summary = Column(Text, nullable=True)
+    key_points = Column(Text, nullable=True)
+    requirements = Column(Text, nullable=True)
+    next_action = Column(Text, nullable=True)
+    follow_up_notes = Column(Text, nullable=True)
 
     created_at = Column(
         DateTime(timezone=True),

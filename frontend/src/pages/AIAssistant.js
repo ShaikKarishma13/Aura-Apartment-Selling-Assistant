@@ -256,7 +256,60 @@ setTimeout(() => {
     }
   };
 
-
+  const renderMessageText = (text) => {
+    if (!text) return "";
+    
+    // Regex to match markdown image format: ![alt](url)
+    const regex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = regex.exec(text)) !== null) {
+      const matchIndex = match.index;
+      
+      // Add text before the image
+      if (matchIndex > lastIndex) {
+        parts.push(text.substring(lastIndex, matchIndex));
+      }
+      
+      const alt = match[1];
+      const url = match[2];
+      
+      // Add the image tag
+      parts.push(
+        <div key={matchIndex} style={{ margin: "14px 0", textAlign: "center" }}>
+          <img 
+            src={url} 
+            alt={alt} 
+            style={{ 
+              maxWidth: "100%", 
+              maxHeight: "240px",
+              objectFit: "cover",
+              borderRadius: "16px", 
+              border: "1.5px solid rgba(255, 255, 255, 0.22)",
+              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.35)",
+              display: "block",
+              margin: "0 auto"
+            }} 
+          />
+          <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginTop: "6px", fontWeight: "600" }}>
+            {alt}
+          </div>
+        </div>
+      );
+      
+      lastIndex = regex.lastIndex;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : text;
+  };
 
   return (
     <div className="main-content">
@@ -431,7 +484,7 @@ boxShadow:
                 whiteSpace: "pre-wrap",
               }}
             >
-              {msg.text}
+              {renderMessageText(msg.text)}
             </div>
 
           ))}

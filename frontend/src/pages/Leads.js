@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import PieChartSection from "../components/PieChartSection";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 function Leads({ leads, setLeads, setActivities }) {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("Hot");
@@ -15,6 +18,18 @@ function Leads({ leads, setLeads, setActivities }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [budget, setBudget] = useState("");
   const [location, setLocation] = useState("");
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmLead, setConfirmLead] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast({ message: "", type: "" });
+    }, 5000);
+  };
+
   useEffect(() => {
 
   const fetchLeads = async () => {
@@ -222,34 +237,9 @@ saveLeadToBackend();
     setLocation("");
   };
   // 📞 CALL
-const handleCall = async (lead) => {
-
-  try {
-
-    await axios.post(
-      `http://127.0.0.1:8000/api/call/make-call?phone=${lead.phone}`
-    );
-
-    await axios.post(
-      "http://127.0.0.1:8000/api/call/save-history",
-      {
-        name: lead.name,
-        phone: lead.phone,
-        duration: 120,
-        status: "Completed",
-        recording_url: "http://127.0.0.1:8000/recordings/call1.mp3"
-      }
-    );
-
-    alert(`📞 Calling ${lead.name}`);
-
-  } catch (error) {
-
-    console.error(error);
-    alert("Call failed");
-
-  }
-};
+  const handleCall = (lead) => {
+    navigate(`/calls?phone=${encodeURIComponent(lead.phone)}&name=${encodeURIComponent(lead.name)}`);
+  };
 
   // ✅ DELETE
 const handleDelete = async (phone) => {
@@ -437,9 +427,20 @@ const handleDelete = async (phone) => {
               </span>
 
               <div>
-                <button onClick={(e) => { e.stopPropagation(); handleCall(lead); }}>📞</button>
-                <button onClick={(e) => { e.stopPropagation(); startEdit(lead); }}>✏️</button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(lead.phone); }}>❌</button>
+                <button title="Call Lead" onClick={(e) => { e.stopPropagation(); handleCall(lead); }}>📞</button>
+                <button 
+                  title="Send Confirmation" 
+                  className="confirm-btn"
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setConfirmLead(lead); 
+                    setIsConfirmOpen(true); 
+                  }}
+                >
+                  💬
+                </button>
+                <button title="Edit Lead" onClick={(e) => { e.stopPropagation(); startEdit(lead); }}>✏️</button>
+                <button title="Delete Lead" onClick={(e) => { e.stopPropagation(); handleDelete(lead.phone); }}>❌</button>
               </div>
             </div>
           ))}
@@ -518,6 +519,21 @@ const handleDelete = async (phone) => {
 
         </div>
 
+        {toast.message && (
+          <div className={`premium-toast ${toast.type}`}>
+            {toast.type === "success" ? "✅" : toast.type === "error" ? "❌" : "ℹ️"} {toast.message}
+          </div>
+        )}
+
+        <ConfirmationModal
+          isOpen={isConfirmOpen}
+          lead={confirmLead}
+          onClose={() => {
+            setIsConfirmOpen(false);
+            setConfirmLead(null);
+          }}
+          showToast={showToast}
+        />
       </div>
     
   );

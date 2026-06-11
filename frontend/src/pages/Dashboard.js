@@ -4,40 +4,103 @@ import axios from "axios";
 import Sidebar from "../layout/Sidebar";
 import Topbar from "../layout/Topbar";
 import ChartSection from "../components/ChartSection";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 function Dashboard({ leads = [], activities = [], calls = [] }) {
- const [stats, setStats] = useState({
-  totalChats: 0,
-  totalLeads: 0,
-  siteVisits: 0,
-  interestedCustomers: 0,
-});
+  const [stats, setStats] = useState({
+    totalChats: 0,
+    totalLeads: 0,
+    siteVisits: 0,
+    highIntentLeads: 0,
+  });
+  const [localLeads, setLocalLeads] = useState(leads);
+  const [localActivities, setLocalActivities] = useState([]);
 
-useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/dashboard/stats"
-      );
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmLead, setConfirmLead] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "" });
 
-      setStats(response.data);
-
-    } catch (error) {
-      console.error("Dashboard fetch failed", error);
-    }
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast({ message: "", type: "" });
+    }, 5000);
   };
 
-  fetchStats();
-}, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const statsRes = await axios.get(
+          "http://127.0.0.1:8000/api/dashboard/stats"
+        );
+        setStats(statsRes.data);
+
+        const leadsRes = await axios.get(
+          "http://127.0.0.1:8000/api/chat/all-leads"
+        );
+        const fetchedLeads = leadsRes.data.map((item) => ({
+          name: item.name || "Unknown",
+          phone: item.phone || "N/A",
+          status: item.status || "Interested",
+          property_name: item.property_name || "",
+          budget: item.budget || "",
+          location: item.location || "",
+          followUpDate: item.follow_up_date || "",
+          visitDate: item.visit_date || "",
+          notes: item.notes || "",
+          createdAt: item.created_at,
+          userMessage: `Interested in ${item.property_name || "Property"}`,
+          aiResponse: "Lead captured from chatbot",
+          sentiment: "Chatbot Lead"
+        }));
+        setLocalLeads(fetchedLeads);
+
+        const callsRes = await axios.get(
+          "http://127.0.0.1:8000/api/call/history"
+        );
+        const fetchedCalls = callsRes.data;
+
+        const events = [];
+
+        fetchedLeads.forEach(lead => {
+          if (lead.createdAt) {
+            events.push({
+              time: lead.createdAt,
+              text: `Lead captured: ${lead.name} (${lead.status})`,
+              rawTime: new Date(lead.createdAt).getTime()
+            });
+          }
+        });
+
+        fetchedCalls.forEach(call => {
+          if (call.created_at) {
+            events.push({
+              time: call.created_at,
+              text: `Call completed with ${call.name} - Status: ${call.status}, Sentiment: ${call.sentiment || 'N/A'}`,
+              rawTime: new Date(call.created_at).getTime()
+            });
+          }
+        });
+
+        events.sort((a, b) => b.rawTime - a.rawTime);
+        setLocalActivities(events);
+
+      } catch (error) {
+        console.error("Dashboard fetch failed", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
  
 
   // ================= AI INSIGHTS =================
   const getInsights = () => {
-    if (leads.length === 0) return [];
+    if (localLeads.length === 0) return [];
 
     const locationCount = {};
-    leads.forEach((l) => {
+    localLeads.forEach((l) => {
       if (!l.location) return;
       locationCount[l.location] = (locationCount[l.location] || 0) + 1;
     });
@@ -49,7 +112,7 @@ useEffect(() => {
       : "N/A";
 
     const budgetCount = {};
-    leads.forEach((l) => {
+    localLeads.forEach((l) => {
       if (!l.budget) return;
       budgetCount[l.budget] = (budgetCount[l.budget] || 0) + 1;
     });
@@ -60,7 +123,7 @@ useEffect(() => {
         )
       : "N/A";
 
-    const hotCount = leads.filter((l) => l.status === "Hot").length;
+    const hotCount = localLeads.filter((l) => l.status === "Hot").length;
 
     const hour = new Date().getHours();
     const timeInsight =
@@ -80,12 +143,12 @@ useEffect(() => {
 
   // ================= AI RECOMMENDATION =================
   const getBestLead = () => {
-    if (leads.length === 0) return null;
+    if (localLeads.length === 0) return null;
 
     const priority = { Hot: 3, Warm: 2, Cold: 1 };
 
-    return [...leads].sort(
-      (a, b) => priority[b.status] - priority[a.status]
+    return [...localLeads].sort(
+      (a, b) => (priority[b.status] || 0) - (priority[a.status] || 0)
     )[0];
   };
 
@@ -93,15 +156,15 @@ useEffect(() => {
 
   // ================= NEXT ACTION =================
   const getNextAction = () => {
-    if (leads.length === 0) return "No actions yet";
+    if (localLeads.length === 0) return "No actions yet";
 
-    const hotLead = leads.find((l) => l.status === "Hot");
+    const hotLead = localLeads.find((l) => l.status === "Hot");
     if (hotLead) return `🔥 Close deal with ${hotLead.name}`;
 
-    const warmLead = leads.find((l) => l.status === "Warm");
+    const warmLead = localLeads.find((l) => l.status === "Warm");
     if (warmLead) return `📅 Follow up ${warmLead.name}`;
 
-    const coldLead = leads.find((l) => l.status === "Cold");
+    const coldLead = localLeads.find((l) => l.status === "Cold");
     if (coldLead) return `📞 Re-engage ${coldLead.name}`;
 
     return "Monitor leads";
@@ -134,8 +197,8 @@ useEffect(() => {
             </div>
 
             <div className="card">
-              <h3>Interested Customers 🔥</h3>
-              <p>{stats.interestedCustomers}</p>
+              <h3>High-Intent Leads 🔥</h3>
+              <p>{stats.highIntentLeads}</p>
             </div>
 
             <div className="card">
@@ -146,7 +209,7 @@ useEffect(() => {
 
           {/* ================= CHART ================= */}
           <div className="charts-section">
-            <ChartSection leads={leads} />
+            <ChartSection leads={localLeads} />
           </div>
 
           {/* ================= AI INSIGHTS ================= */}
@@ -209,12 +272,12 @@ useEffect(() => {
                 </thead>
 
                 <tbody>
-                  {leads.length === 0 ? (
+                  {localLeads.length === 0 ? (
                     <tr>
                       <td colSpan="7">No leads yet</td>
                     </tr>
                   ) : (
-                    leads.slice(-5).reverse().map((lead) => (
+                    localLeads.slice(-5).reverse().map((lead) => (
                       <tr key={lead.phone}>
                         <td>{lead.name}</td>
                         <td>{lead.phone}</td>
@@ -230,8 +293,19 @@ useEffect(() => {
                         <td>{lead.lastContact || "—"}</td>
 
                         <td>
-                          <button className="view-btn">👁</button>
-                          <button className="delete-btn">❌</button>
+                          <button className="view-btn" title="View Details">👁</button>
+                          <button 
+                            className="confirm-btn" 
+                            title="Send Confirmation"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmLead(lead);
+                              setIsConfirmOpen(true);
+                            }}
+                          >
+                            💬
+                          </button>
+                          <button className="delete-btn" title="Delete Lead">❌</button>
                         </td>
                       </tr>
                     ))
@@ -243,15 +317,16 @@ useEffect(() => {
             <div className="activity-feed">
               <h2>AI Activity Feed 🤖</h2>
 
-              {activities.length === 0 ? (
+              {localActivities.length === 0 ? (
                 <p>No activity yet</p>
               ) : (
-                activities.slice(0, 5).map((act, index) => {
+                localActivities.slice(0, 5).map((act, index) => {
                   let icon = "📌";
 
-                  if (act.text.includes("Calling")) icon = "📞";
+                  if (act.text.includes("Calling") || act.text.includes("Call")) icon = "📞";
+                  else if (act.text.includes("captured") || act.text.includes("Captured")) icon = "📥";
                   else if (act.text.includes("responded")) icon = "💬";
-                  else if (act.text.includes("HOT")) icon = "🔥";
+                  else if (act.text.includes("HOT") || act.text.includes("Hot") || act.text.includes("Warm")) icon = "🔥";
                   else if (act.text.includes("follow-up")) icon = "📅";
                   else if (act.text.includes("removed")) icon = "❌";
 
@@ -277,6 +352,22 @@ useEffect(() => {
 
         </div>
       </div>
+
+      {toast.message && (
+        <div className={`premium-toast ${toast.type}`}>
+          {toast.type === "success" ? "✅" : toast.type === "error" ? "❌" : "ℹ️"} {toast.message}
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        lead={confirmLead}
+        onClose={() => {
+          setIsConfirmOpen(false);
+          setConfirmLead(null);
+        }}
+        showToast={showToast}
+      />
     </div>
   );
 }

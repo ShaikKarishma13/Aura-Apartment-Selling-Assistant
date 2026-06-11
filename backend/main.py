@@ -31,6 +31,9 @@ app = FastAPI(title="Selling Apartment Agent API")
 RECORDINGS_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "recordings")
 )
+ASSETS_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "assets")
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,8 +52,24 @@ app.mount(
     StaticFiles(directory=RECORDINGS_DIR),
     name="recordings"
 )
+app.mount(
+    "/assets",
+    StaticFiles(directory=ASSETS_DIR),
+    name="assets"
+)
 
 
 @app.get("/")
 def health_check():
     return {"status": "ok", "message": "Backend is running"}
+
+@app.get("/debug/routes")
+def list_routes():
+    routes = []
+    for route in app.routes:
+        route_info = {"path": getattr(route, "path", str(route)), "name": getattr(route, "name", "unknown")}
+        if hasattr(route, "methods"):
+            route_info["methods"] = list(route.methods)
+        routes.append(route_info)
+    return {"routes": routes, "total": len(routes)}
+
