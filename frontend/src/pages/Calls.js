@@ -66,6 +66,7 @@ function Calls() {
   // Refs for socket / scrolling
   const socketRef = useRef(null);
   const transcriptEndRef = useRef(null);
+  const transcriptBoxRef = useRef(null);
   const timerRef = useRef(null);
   const audioCtxRef = useRef(null);
   const nextPlayTimeRef = useRef(0);
@@ -79,6 +80,29 @@ function Calls() {
       .catch((err) => {
         console.error(err);
       });
+  };
+
+  const handleDeleteHistory = (callId) => {
+    if (window.confirm("Are you sure you want to delete this call record?")) {
+      fetch(`http://localhost:8000/api/call/history/${callId}`, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            setCallHistory((prev) => prev.filter((call) => call.id !== callId));
+            if (selectedCallData && selectedCallData.id === callId) {
+              setSelectedTranscript(null);
+              setSelectedCallData(null);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error("Error deleting call history:", err);
+        });
+    }
   };
 
   // LOAD CALL HISTORY FROM DATABASE
@@ -151,10 +175,13 @@ function Calls() {
 
 
 
-  // Scroll transcript to bottom
+  // Scroll transcript to bottom (box container only)
   useEffect(() => {
-    if (transcriptEndRef.current) {
-      transcriptEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (transcriptBoxRef.current) {
+      transcriptBoxRef.current.scrollTo({
+        top: transcriptBoxRef.current.scrollHeight,
+        behavior: "smooth"
+      });
     }
   }, [transcriptLines]);
 
@@ -327,7 +354,7 @@ function Calls() {
                         )}
                       </div>
 
-                      <div className="live-transcript-box">
+                      <div ref={transcriptBoxRef} className="live-transcript-box">
                         {transcriptLines.length === 0 ? (
                           <div className="transcript-placeholder">
                             <p>Connecting voice stream...</p>
@@ -420,14 +447,26 @@ function Calls() {
                   <span className={`status-badge-history ${call.status?.toLowerCase() || "completed"}`}>
                     {call.status || "Completed"}
                   </span>
-                  <button
-                    onClick={() => {
-                      setSelectedTranscript(call.transcript);
-                      setSelectedCallData(call);
-                    }}
-                  >
-                    View Transcript
-                  </button>
+                  <div className="history-actions" style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      onClick={() => {
+                        setSelectedTranscript(call.transcript);
+                        setSelectedCallData(call);
+                      }}
+                    >
+                      View Transcript
+                    </button>
+                    <button
+                      className="delete-history-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteHistory(call.id);
+                      }}
+                      title="Delete Call History"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               ))
             )}

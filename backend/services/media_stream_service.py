@@ -147,6 +147,12 @@ class AudioBuffer:
         # Track total bytes needed for a chunk
         # 16kHz * 2 bytes/sample * CHUNK_DURATION_SECS
         self.chunk_bytes = WHISPER_SAMPLE_RATE * SAMPLE_WIDTH * CHUNK_DURATION_SECS
+        self.aura_speaking_until = 0.0
+
+    def set_aura_speaking(self, duration: float):
+        """Set a timestamp until which Aura is speaking and inbound audio should be ignored."""
+        self.aura_speaking_until = time.time() + duration
+        logger.info(f"Aura is speaking for {duration:.2f} seconds. Inbound audio will be ignored until {self.aura_speaking_until}.")
 
     async def add_audio(self, mulaw_base64: str):
         """
@@ -154,12 +160,22 @@ class AudioBuffer:
         convert to 16kHz PCM, and add to buffer.
         Triggers transcription if enough audio accumulated.
         """
+        # Quick check without lock to return immediately if Aura is speaking
+        if time.time() < self.aura_speaking_until:
+            return
+
         try:
             # 1. Decode base64 → raw mulaw bytes
             raw_mulaw = base64.b64decode(mulaw_base64)
 
             # Buffer raw mulaw for the frontend to avoid browser audio context underruns on tiny 20ms chunks
             async with self._lock:
+                if time.time() < self.aura_speaking_until:
+                    self.buffer.clear()
+                    self.silence_secs = 0.0
+                    self.has_speech = False
+                    return
+
                 self.inbound_mulaw_buffer.extend(raw_mulaw)
                 if len(self.inbound_mulaw_buffer) >= 2000:  # 250ms of 8kHz audio (8000 bytes/sec)
                     payload_to_send = base64.b64encode(self.inbound_mulaw_buffer).decode("utf-8")
@@ -181,6 +197,12 @@ class AudioBuffer:
             block_duration = len(pcm_16k) / (WHISPER_SAMPLE_RATE * SAMPLE_WIDTH)
 
             async with self._lock:
+                if time.time() < self.aura_speaking_until:
+                    self.buffer.clear()
+                    self.silence_secs = 0.0
+                    self.has_speech = False
+                    return
+
                 self.buffer.extend(pcm_16k)
                 if block_rms >= 250:
                     self.silence_secs = 0.0
@@ -189,11 +211,11 @@ class AudioBuffer:
                     self.silence_secs += block_duration
 
                 # Check if we should trigger transcription:
-                # 1. User started speaking and has now been silent for 1.2 seconds (end of utterance)
+                # 1. User started speaking and has now been silent for 1.8 seconds (end of utterance)
                 # 2. Or the buffer has accumulated 15 seconds to prevent memory overflow
                 buffer_duration = len(self.buffer) / (WHISPER_SAMPLE_RATE * SAMPLE_WIDTH)
                 should_transcribe = False
-                if self.has_speech and self.silence_secs >= 1.2:
+                if self.has_speech and self.silence_secs >= 1.8:
                     should_transcribe = True
                 elif buffer_duration >= 15.0:
                     should_transcribe = True
@@ -206,13 +228,26 @@ class AudioBuffer:
 
     async def flush(self):
         """Force-transcribe any remaining audio in the buffer."""
+        if time.time() < self.aura_speaking_until:
+            return
+
+        audio_data = None
         async with self._lock:
             if len(self.buffer) > WHISPER_SAMPLE_RATE * SAMPLE_WIDTH:  # At least 1 second
-                await self._transcribe_buffer_locked()
+                audio_data = bytes(self.buffer)
+                self.buffer.clear()
             if self.inbound_mulaw_buffer:
                 payload_to_send = base64.b64encode(self.inbound_mulaw_buffer).decode("utf-8")
                 self.inbound_mulaw_buffer.clear()
                 asyncio.create_task(self._forward_inbound_audio(payload_to_send))
+
+        if audio_data:
+            try:
+                transcript = await asyncio.to_thread(_transcribe_pcm_chunk, audio_data)
+                if transcript and transcript.strip():
+                    await send_transcript_to_frontend(self.call_sid, "Lead", transcript)
+            except Exception as e:
+                logger.error(f"Flush transcription failed: {e}")
 
     async def _forward_inbound_audio(self, b64_payload: str):
         stream = await get_stream(self.call_sid)
@@ -227,35 +262,31 @@ class AudioBuffer:
 
     async def _transcribe_buffer(self):
         """Transcribe the current buffer contents."""
+        # Hold lock ONLY while extracting and clearing the buffer contents
+        audio_data = None
         async with self._lock:
-            await self._transcribe_buffer_locked()
+            if self.buffer:
+                audio_data = bytes(self.buffer)
+                self.buffer.clear()
+            self.last_transcribe_time = time.time()
+            self.has_speech = False
+            self.silence_secs = 0.0
 
-    async def _transcribe_buffer_locked(self):
-        """Internal: transcribe buffer (must hold lock)."""
-        if not self.buffer:
+        if not audio_data:
             return
 
         if not WHISPER_AVAILABLE:
             logger.warning("Whisper not available, cannot transcribe audio chunk")
-            self.buffer.clear()
             return
 
-        # Copy buffer and clear
-        audio_data = bytes(self.buffer)
-        self.buffer.clear()
-        self.last_transcribe_time = time.time()
-        # Reset turn-taking state for the next turn
-        self.has_speech = False
-        self.silence_secs = 0.0
-
-        # Check RMS volume to prevent Whisper hallucinating on silence/static line noise
+        # Check RMS volume outside the lock
         rms = audioop.rms(audio_data, SAMPLE_WIDTH)
         logger.info(f"Audio chunk RMS volume: {rms}")
         if rms < 250:
             logger.info("RMS volume is below speech threshold (250) — skipping transcription")
             return
 
-        # Write to temp WAV and transcribe
+        # Write to temp WAV and transcribe outside the lock
         try:
             transcript = await asyncio.to_thread(
                 _transcribe_pcm_chunk, audio_data
@@ -308,6 +339,17 @@ class AudioBuffer:
             mulaw_b64 = await text_to_mulaw_base64(aura_text)
             
             if mulaw_b64:
+                # Calculate duration of response audio (8kHz mulaw = 8000 bytes/sec)
+                decoded_mulaw = base64.b64decode(mulaw_b64)
+                duration = len(decoded_mulaw) / 8000.0
+                
+                # Acquire lock briefly to clear any audio accumulated during API call and set speaking lock
+                async with self._lock:
+                    self.buffer.clear()
+                    self.silence_secs = 0.0
+                    self.has_speech = False
+                    self.set_aura_speaking(duration)
+
                 logger.info(f"Sending audio response to Twilio (stream SID: {self.stream_sid})")
                 media_msg = {
                     "event": "media",

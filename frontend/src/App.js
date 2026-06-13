@@ -9,6 +9,8 @@ import Settings from "./pages/settings";
 import Analytics from "./pages/Analytics";
 import Calls from "./pages/Calls";
 import AIAssistant from "./pages/AIAssistant";
+import Properties from "./pages/Properties";
+import PropertyDetails from "./pages/PropertyDetails";
 
 function App() {
 
@@ -88,6 +90,16 @@ function App() {
         <Route
           path="/calls"
           element={<Calls />}
+        />
+
+        <Route
+          path="/properties"
+          element={<Properties />}
+        />
+
+        <Route
+          path="/properties/:id"
+          element={<PropertyDetails />}
         />
 
       </Routes>

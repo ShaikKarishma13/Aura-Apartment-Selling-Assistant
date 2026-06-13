@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import json
 import logging
 
@@ -211,6 +212,26 @@ def get_call_history():
             call.recording_url = DEFAULT_RECORDING_URL
     db.close()
     return calls
+@router.delete("/history/{call_id}")
+def delete_call_history(call_id: int):
+    db = SessionLocal()
+    try:
+        call = db.query(CallHistory).filter(CallHistory.id == call_id).first()
+        if not call:
+            return {"error": "Call history record not found"}
+        db.delete(call)
+        db.commit()
+        logger.info(f"Deleted call history ID: {call_id}")
+        return {"message": "Call history deleted successfully", "id": call_id}
+    except Exception as e:
+        logger.error(f"Failed to delete call history ID {call_id}: {e}")
+        db.rollback()
+        return {"error": str(e)}
+    finally:
+        db.close()
+
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -372,6 +393,11 @@ async def twilio_media_stream(websocket: WebSocket):
                         logger.info("Generating and sending initial greeting TTS to Twilio...")
                         mulaw_b64 = await text_to_mulaw_base64(greeting_text)
                         if mulaw_b64:
+                            # Calculate duration of the greeting audio (8kHz mulaw = 8000 bytes/sec)
+                            decoded_mulaw = base64.b64decode(mulaw_b64)
+                            duration = len(decoded_mulaw) / 8000.0
+                            audio_buffer.set_aura_speaking(duration)
+
                             # Send to Twilio
                             await websocket.send_json({
                                 "event": "media",
@@ -490,6 +516,8 @@ async def websocket_active_call(websocket: WebSocket):
         register_stream, unregister_stream, wait_for_completion,
         get_all_transcripts, update_stream_status
     )
+    import time
+    actual_duration = 0
 
     await websocket.accept()
     print(f"WS Active Call established: phone={phone}, name={name}, mode={mode}")
@@ -581,12 +609,15 @@ async def websocket_active_call(websocket: WebSocket):
 
         reader_task = asyncio.create_task(websocket_reader())
         completion_task = asyncio.create_task(wait_for_completion(call_sid, timeout=300.0))
+        start_time = time.time()
 
         # Wait for either the call to complete or the client to disconnect
         done, pending = await asyncio.wait(
             [completion_task, reader_task],
             return_when=asyncio.FIRST_COMPLETED
         )
+
+        actual_duration = max(int(time.time() - start_time), 1)
 
         # Cancel whichever is still pending
         for task in pending:
@@ -681,7 +712,7 @@ async def websocket_active_call(websocket: WebSocket):
         call_rec = CallHistory(
             name=name or "Unknown",
             phone=phone or "N/A",
-            duration=max(len(full_transcript_lines) * 5, 20),
+            duration=actual_duration,
             transcript=transcript,
             recording_url=recording_url,
             property_type=analysis.get("property_type"),

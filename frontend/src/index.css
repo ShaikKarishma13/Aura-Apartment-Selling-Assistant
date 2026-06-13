@@ -6,49 +6,43 @@ body,
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
-  background: linear-gradient(
-    135deg,
-    #4f9df7,
-    #6c63ff,
-    #6a11cb
-  );
-   background-attachment: fixed;
+  background: #0f172a;
+  background-attachment: fixed;
   overflow-x: hidden;
 }
 body {
   background-attachment: fixed;
   box-sizing: border-box;
-
 }
 
 
 .aura-input::placeholder {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.4);
 }
 .aura-input:focus {
 
-  border: 2px solid #00e676 !important;
+  border: 2px solid #3b82f6 !important;
 
   box-shadow:
-    0 0 15px #00e676,
-    0 0 30px rgba(0,230,118,0.4);
+    0 0 15px rgba(59, 130, 246, 0.25),
+    0 0 30px rgba(59, 130, 246, 0.15);
 
 }
 select option {
-  background: #2b2b4f;
-  color: white;
+  background: #1e293b;
+  color: #f8fafc;
 }
 select:focus {
 
-  border: 2px solid #00e676 !important;
+  border: 2px solid #3b82f6 !important;
 
   box-shadow:
-    0 0 15px #00e676,
-    0 0 30px rgba(0,230,118,0.4);
+    0 0 15px rgba(59, 130, 246, 0.25),
+    0 0 30px rgba(59, 130, 246, 0.15);
 
 }
 .aura-input::placeholder {
-  color: #666;
+  color: rgba(255, 255, 255, 0.45);
 }
 @keyframes pulse {
 

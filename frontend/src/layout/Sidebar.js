@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -14,19 +14,14 @@ function Sidebar() {
       <h2 className="logo">🏢 AI Agent</h2>
 
       <ul className="menu">
-        <li><Link to="/dashboard">🏠 Dashboard</Link></li>
-        <li><Link to="/leads">👥 Leads</Link></li>
-        <li><Link to="/calls">📞 Calls</Link></li>
-        <li><Link to="/analytics">📊 Analytics</Link></li>
-        <li>
-  <Link to="/ai-assistant">
-    🤖 AI Assistant
-  </Link>
-</li>
-        
-
-        <li><Link to="/follow-ups">📅 Follow-ups</Link></li>
-        <li><Link to="/settings">⚙️ Settings</Link></li>
+        <li><NavLink to="/dashboard">🏠 Dashboard</NavLink></li>
+        <li><NavLink to="/leads">👥 Leads</NavLink></li>
+        <li><NavLink to="/calls">📞 Calls</NavLink></li>
+        <li><NavLink to="/properties">🏢 Properties</NavLink></li>
+        <li><NavLink to="/analytics">📊 Analytics</NavLink></li>
+        <li><NavLink to="/ai-assistant">🤖 AI Assistant</NavLink></li>
+        <li><NavLink to="/follow-ups">📅 Follow-ups</NavLink></li>
+        <li><NavLink to="/settings">⚙️ Settings</NavLink></li>
       </ul>
 
       {/* 🔥 LOGOUT BUTTON */}

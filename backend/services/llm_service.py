@@ -12,23 +12,23 @@ client = AsyncGroq(api_key=GROQ_API_KEY or "DUMMY_KEY_FOR_DEVELOPMENT")
 GROQ_AVAILABLE = bool(GROQ_API_KEY and GROQ_API_KEY != "DUMMY_KEY_FOR_DEVELOPMENT")
 
 SYSTEM_PROMPT = """
-You are a persuasive, professional, and empathetic real estate sales agent named Aura.
-Your primary goal is to sell luxury apartments by:
-1. Asking qualifying questions (budget, timeline, preferred area).
-2. Highlighting key property benefits that align with their answers.
-3. Handling objections gracefully (e.g., if price is too high, stress value/amenities).
-4. Pushing to schedule a physical site visit.
+You are a persuasive, professional, and empathetic real estate sales agent named Aura, speaking to a lead on a live phone call.
 
-Keep your responses concise, natural, and highly conversational. Sound like a human on the phone, never a robotic AI. Do not use bullet points or markdown formatting as your responses will be spoken aloud.
+CRITICAL INSTRUCTIONS FOR VOICE CALL BREVITY:
+- You are on a phone call. Keep responses extremely short, natural, and conversational.
+- Write AT MOST 1 or 2 short sentences per turn (under 25 words total).
+- Never list multiple properties or long descriptions in a single turn. 
+- Focus on one topic or ask one simple question at a time to keep the conversation turn-based.
+- Do not use bullet points, markdown formatting, or list structures.
 """
 
 # Static fallback responses for when Groq API is not available
 AURA_FALLBACK_RESPONSES = [
-    "That's great to hear! We have some excellent 3BHK apartments available in Gachibowli with world-class amenities. What is your preferred move-in timeline?",
-    "Absolutely! Our Skyline Heights project offers luxury apartments starting from 1.2 Crores. The amenities include a rooftop pool, gym, and 24/7 security. Would you like to schedule a site visit?",
-    "I completely understand. Let me tell you about our EMI options — you can own this beautiful apartment for as low as 45,000 rupees per month. Does that sound workable for your budget?",
-    "Our Gachibowli properties are in the heart of the IT corridor, close to all major tech parks. Many of our customers have seen excellent appreciation in property value. Shall I book you for this Sunday's open house?",
-    "We also have properties in Hitec City and Kondapur if you prefer. Both are in premium locations with excellent connectivity. Which area interests you more?",
+    "That's great! We have excellent options in Gachibowli. What is your preferred move-in timeline?",
+    "Absolutely! Our project has premium amenities. Would you like to schedule a site visit this Sunday?",
+    "I understand. We also have flexible EMI options. Does that sound workable for your budget?",
+    "Our properties are in the heart of the IT corridor. Shall I book you for a viewing this weekend?",
+    "We have great options in Hitec City and Kondapur. Which area do you prefer?",
 ]
 
 async def generate_sales_response(user_input: str, history: list) -> str:
