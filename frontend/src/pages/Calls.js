@@ -54,6 +54,8 @@ function Calls() {
   const [callHistory, setCallHistory] = useState([]);
   const [selectedTranscript, setSelectedTranscript] = useState(null);
   const [selectedCallData, setSelectedCallData] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Active call states
   const [callMode, setCallMode] = useState("twilio"); // demo, sandbox, twilio
@@ -83,26 +85,35 @@ function Calls() {
   };
 
   const handleDeleteHistory = (callId) => {
-    if (window.confirm("Are you sure you want to delete this call record?")) {
-      fetch(`http://localhost:8000/api/call/history/${callId}`, {
-        method: "DELETE",
+    setDeletingId(callId);
+    fetch(`http://localhost:8000/api/call/history/${callId}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}`);
+        }
+        return res.json();
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            setCallHistory((prev) => prev.filter((call) => call.id !== callId));
-            if (selectedCallData && selectedCallData.id === callId) {
-              setSelectedTranscript(null);
-              setSelectedCallData(null);
-            }
+      .then((data) => {
+        if (data.error) {
+          alert("Delete failed: " + data.error);
+        } else {
+          setCallHistory((prev) => prev.filter((call) => call.id !== callId));
+          if (selectedCallData && selectedCallData.id === callId) {
+            setSelectedTranscript(null);
+            setSelectedCallData(null);
           }
-        })
-        .catch((err) => {
-          console.error("Error deleting call history:", err);
-        });
-    }
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting call history:", err);
+        alert("Could not delete record. Please try again.");
+      })
+      .finally(() => {
+        setDeletingId(null);
+        setConfirmDeleteId(null);
+      });
   };
 
   // LOAD CALL HISTORY FROM DATABASE
@@ -447,7 +458,7 @@ function Calls() {
                   <span className={`status-badge-history ${call.status?.toLowerCase() || "completed"}`}>
                     {call.status || "Completed"}
                   </span>
-                  <div className="history-actions" style={{ display: "flex", gap: "8px" }}>
+                  <div className="history-actions" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                     <button
                       onClick={() => {
                         setSelectedTranscript(call.transcript);
@@ -456,16 +467,36 @@ function Calls() {
                     >
                       View Transcript
                     </button>
-                    <button
-                      className="delete-history-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteHistory(call.id);
-                      }}
-                      title="Delete Call History"
-                    >
-                      🗑️
-                    </button>
+                    {confirmDeleteId === call.id ? (
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <span style={{ color: "#f87171", fontSize: "0.8rem", fontWeight: 600 }}>Delete?</span>
+                        <button
+                          className="delete-history-btn"
+                          onClick={(e) => { e.stopPropagation(); handleDeleteHistory(call.id); }}
+                          disabled={deletingId === call.id}
+                          style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                        >
+                          {deletingId === call.id ? "⏳" : "✅ Yes"}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                          style={{ padding: "6px 10px", fontSize: "0.8rem", background: "rgba(100,116,139,0.2)", border: "1.5px solid #475569", borderRadius: "8px", color: "#94a3b8", cursor: "pointer" }}
+                        >
+                          ✖ No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="delete-history-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDeleteId(call.id);
+                        }}
+                        title="Delete Call History"
+                      >
+                        🗑️
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
